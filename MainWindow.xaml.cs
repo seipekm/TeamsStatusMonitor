@@ -19,6 +19,7 @@ namespace TeamsStatus
         private string _lastStatus = "";
         private System.Windows.Threading.DispatcherTimer _sendTimer;
         private bool _isLoaded = false;
+        private bool _isConnected = false;
 
         public MainWindow()
         {
@@ -147,13 +148,43 @@ namespace TeamsStatus
             {
                 _serialPort = new SerialPort(port, baudRate);
                 _serialPort.Open();
+                SetConnectionStatus(true);
                 SendStatus(_lastStatus); // Zuletzt bekannten Status senden
             }
             catch (Exception ex)
             {
+                SetConnectionStatus(false);
                 MessageBox.Show($"Fehler beim Öffnen des COM-Ports: {ex.Message}");
             }
             SaveSettings();
+        }
+
+        private void SetConnectionStatus(bool connected)
+        {
+            _isConnected = connected;
+            Dispatcher.Invoke(() => {
+                if (TxtConnStatus != null && ConnIcon != null)
+                {
+                    if (connected)
+                    {
+                        TxtConnStatus.Text = "Verbunden";
+                        ConnIcon.Fill = Brushes.LimeGreen;
+                        MyNotifyIcon.ToolTipText = "Teams Status Monitor (Verbunden)";
+                    }
+                    else
+                    {
+                        TxtConnStatus.Text = "Getrennt";
+                        ConnIcon.Fill = Brushes.Red;
+                        MyNotifyIcon.ToolTipText = "Teams Status Monitor (Getrennt)";
+                    }
+                }
+                
+                // Force tray icon update
+                if (StatusIcon != null)
+                {
+                    UpdateTrayIcon((SolidColorBrush)StatusIcon.Fill);
+                }
+            });
         }
 
         private void BtnMode_Click(object sender, RoutedEventArgs e)
@@ -223,6 +254,15 @@ namespace TeamsStatus
                     {
                         g.DrawEllipse(p, 1, 1, 14, 14);
                     }
+
+                    if (!_isConnected)
+                    {
+                        using (var p = new System.Drawing.Pen(System.Drawing.Color.Red, 2))
+                        {
+                            g.DrawLine(p, 3, 3, 13, 13);
+                            g.DrawLine(p, 3, 13, 13, 3);
+                        }
+                    }
                 }
                 
                 IntPtr hIcon = bmp.GetHicon();
@@ -270,8 +310,17 @@ namespace TeamsStatus
                     // Sende Format: R,G,B,Helligkeit (z.B. "50,205,50,255\n")
                     string command = $"{r},{g},{b},{brightness}\n";
                     _serialPort.Write(command);
+                    
+                    if (!_isConnected) SetConnectionStatus(true);
                 }
-                catch { } // Fehler ignorieren, wenn Verbindung z.B. plötzlich abbricht
+                catch 
+                {
+                    if (_isConnected) SetConnectionStatus(false);
+                }
+            }
+            else
+            {
+                if (_isConnected) SetConnectionStatus(false);
             }
         }
 

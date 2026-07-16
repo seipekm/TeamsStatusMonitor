@@ -27,7 +27,11 @@
                     <ColumnDefinition Width="100" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
-                    <TextBlock Text="COM Port:" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                        <TextBlock Text="COM Port:" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <Ellipse x:Name="ConnIcon" Width="10" Height="10" Fill="Red" Margin="10,0,5,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TxtConnStatus" Text="Getrennt" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
+                    </StackPanel>
                     <ComboBox x:Name="CmbPorts" SelectionChanged="CmbPorts_SelectionChanged"/>
                 </StackPanel>
                 <StackPanel Grid.Column="2">

@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Text.Json;
 
 namespace TeamsStatus
 {
@@ -17,6 +18,7 @@ namespace TeamsStatus
         private CancellationTokenSource? _cts;
         private string _lastStatus = "";
         private System.Windows.Threading.DispatcherTimer _sendTimer;
+        private bool _isLoaded = false;
 
         public MainWindow()
         {
@@ -37,6 +39,8 @@ namespace TeamsStatus
             _sendTimer.Start();
 
             LoadPorts();
+            LoadSettings();
+            _isLoaded = true;
             BtnMode_Click(BtnModeAuto, new RoutedEventArgs()); // Standard: Auto-Modus
         }
 
@@ -47,6 +51,70 @@ namespace TeamsStatus
                 CmbPorts.SelectedIndex = 0;
         }
 
+        private string GetSettingsFilePath()
+        {
+            string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TeamsStatusMonitor");
+            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+            return Path.Combine(dir, "settings.json");
+        }
+
+        private void SaveSettings()
+        {
+            if (!_isLoaded) return;
+            try
+            {
+                var settings = new
+                {
+                    PortName = CmbPorts.SelectedItem?.ToString() ?? "",
+                    BaudRate = (CmbBaudRate.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "9600",
+                    Brightness = SldBrightness.Value
+                };
+                string json = JsonSerializer.Serialize(settings);
+                System.IO.File.WriteAllText(GetSettingsFilePath(), json);
+            }
+            catch { }
+        }
+
+        private void LoadSettings()
+        {
+            try
+            {
+                string path = GetSettingsFilePath();
+                if (System.IO.File.Exists(path))
+                {
+                    string json = System.IO.File.ReadAllText(path);
+                    using var doc = JsonDocument.Parse(json);
+                    var root = doc.RootElement;
+                    
+                    if (root.TryGetProperty("Brightness", out var b))
+                    {
+                        SldBrightness.Value = b.GetDouble();
+                    }
+                    if (root.TryGetProperty("BaudRate", out var br))
+                    {
+                        string savedBaud = br.GetString() ?? "9600";
+                        foreach (ComboBoxItem item in CmbBaudRate.Items)
+                        {
+                            if (item.Content.ToString() == savedBaud)
+                            {
+                                CmbBaudRate.SelectedItem = item;
+                                break;
+                            }
+                        }
+                    }
+                    if (root.TryGetProperty("PortName", out var pn))
+                    {
+                        string savedPort = pn.GetString() ?? "";
+                        if (!string.IsNullOrEmpty(savedPort) && CmbPorts.Items.Contains(savedPort))
+                        {
+                            CmbPorts.SelectedItem = savedPort;
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
         private void CmbBaudRate_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             // Bei Baudraten-Änderung einfach den COM-Port neu initialisieren (falls einer gewählt ist)
@@ -54,6 +122,7 @@ namespace TeamsStatus
             {
                 CmbPorts_SelectionChanged(null!, null!);
             }
+            SaveSettings();
         }
 
         private void CmbPorts_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -84,6 +153,7 @@ namespace TeamsStatus
             {
                 MessageBox.Show($"Fehler beim Öffnen des COM-Ports: {ex.Message}");
             }
+            SaveSettings();
         }
 
         private void BtnMode_Click(object sender, RoutedEventArgs e)
@@ -173,6 +243,7 @@ namespace TeamsStatus
                     SendStatus(_lastStatus);
                 }
             }
+            SaveSettings();
         }
 
         private void SendStatus(string data)

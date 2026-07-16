@@ -25,9 +25,17 @@ jobs:
     - name: Zip the Output
       run: Compress-Archive -Path ./publish/* -DestinationPath TeamsStatusMonitor_Windows_x64.zip
 
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: TeamsStatusMonitor_Windows_x64
+        path: TeamsStatusMonitor_Windows_x64.zip
+
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
+        tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('v1.0.{0}', github.run_number) }}
+        name: Release ${{ github.ref_type == 'tag' && github.ref_name || format('v1.0.{0}', github.run_number) }}
         files: TeamsStatusMonitor_Windows_x64.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

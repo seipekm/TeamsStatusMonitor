@@ -1,0 +1,33 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Startet automatisch, wenn du ein Tag wie "v1.0" erstellst
+  workflow_dispatch: # Erlaubt den manuellen Start über den Browser
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Publish .NET App (Single File)
+      run: dotnet publish TeamsStatus.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish
+
+    - name: Zip the Output
+      run: Compress-Archive -Path ./publish/* -DestinationPath TeamsStatusMonitor_Windows_x64.zip
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: TeamsStatusMonitor_Windows_x64.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:tb="http://www.hardcodet.net/taskbar"
-        Title="Teams Status Monitor" Height="290" Width="400"
+        Title="Teams Status Monitor" SizeToContent="Height" Width="420"
         Closing="Window_Closing">
     
     <Grid Margin="15">
@@ -32,7 +32,10 @@
                         <Ellipse x:Name="ConnIcon" Width="10" Height="10" Fill="Red" Margin="10,0,5,0" VerticalAlignment="Center"/>
                         <TextBlock x:Name="TxtConnStatus" Text="Getrennt" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
                     </StackPanel>
-                    <ComboBox x:Name="CmbPorts" SelectionChanged="CmbPorts_SelectionChanged"/>
+                    <StackPanel Orientation="Horizontal">
+                        <ComboBox x:Name="CmbPorts" Width="130" SelectionChanged="CmbPorts_SelectionChanged"/>
+                        <Button x:Name="BtnConnect" Content="Verbinden" Click="BtnConnect_Click" Margin="10,0,0,0" Width="70"/>
+                    </StackPanel>
                 </StackPanel>
                 <StackPanel Grid.Column="2">
                     <TextBlock Text="Baudrate:" Margin="0,0,0,5" FontWeight="SemiBold"/>

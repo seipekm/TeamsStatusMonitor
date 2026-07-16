@@ -42,6 +42,7 @@ namespace TeamsStatus
             LoadPorts();
             LoadSettings();
             _isLoaded = true;
+            ConnectSerial(); // Automatisch beim Start mit den geladenen Settings verbinden
             BtnMode_Click(BtnModeAuto, new RoutedEventArgs()); // Standard: Auto-Modus
         }
 
@@ -118,31 +119,41 @@ namespace TeamsStatus
 
         private void CmbBaudRate_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            // Bei Baudraten-Änderung einfach den COM-Port neu initialisieren (falls einer gewählt ist)
-            if (CmbPorts != null && CmbPorts.SelectedItem != null)
-            {
-                CmbPorts_SelectionChanged(null!, null!);
-            }
             SaveSettings();
+            if (_isConnected) DisconnectSerial();
         }
 
         private void CmbPorts_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
+            if (!_isLoaded) return;
+            SaveSettings();
+            if (_isConnected) DisconnectSerial();
+        }
+
+        private void BtnConnect_Click(object sender, RoutedEventArgs e)
+        {
+            if (_isConnected)
+            {
+                DisconnectSerial();
+            }
+            else
+            {
+                ConnectSerial();
+            }
+        }
+
+        private void ConnectSerial()
+        {
             if (CmbPorts.SelectedItem == null) return;
             string port = CmbPorts.SelectedItem.ToString() ?? string.Empty;
             
-            // Baudrate auslesen
             int baudRate = 9600;
             if (CmbBaudRate != null && CmbBaudRate.SelectedItem is ComboBoxItem selectedItem)
             {
                 int.TryParse(selectedItem.Content.ToString(), out baudRate);
             }
 
-            if (_serialPort != null && _serialPort.IsOpen)
-            {
-                _serialPort.Close();
-                _serialPort.Dispose();
-            }
+            DisconnectSerial();
 
             try
             {
@@ -156,13 +167,28 @@ namespace TeamsStatus
                 SetConnectionStatus(false);
                 MessageBox.Show($"Fehler beim Öffnen des COM-Ports: {ex.Message}");
             }
-            SaveSettings();
+        }
+
+        private void DisconnectSerial()
+        {
+            if (_serialPort != null && _serialPort.IsOpen)
+            {
+                try { _serialPort.Close(); } catch { }
+                _serialPort.Dispose();
+                _serialPort = null;
+            }
+            SetConnectionStatus(false);
         }
 
         private void SetConnectionStatus(bool connected)
         {
             _isConnected = connected;
             Dispatcher.Invoke(() => {
+                if (BtnConnect != null)
+                {
+                    BtnConnect.Content = connected ? "Trennen" : "Verbinden";
+                }
+                
                 if (TxtConnStatus != null && ConnIcon != null)
                 {
                     if (connected)
@@ -537,12 +563,8 @@ namespace TeamsStatus
         private void MenuItem_Exit_Click(object sender, RoutedEventArgs e)
         {
             StopMonitoring();
-            
-            if (_serialPort != null && _serialPort.IsOpen)
-            {
-                _serialPort.Close();
-                _serialPort.Dispose();
-            }
+            SaveSettings();
+            DisconnectSerial();
 
             MyNotifyIcon.Dispose();
             Application.Current.Shutdown();

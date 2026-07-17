@@ -53,6 +53,28 @@ namespace TeamsStatus
                 CmbPorts.SelectedIndex = 0;
         }
 
+        private string GetLogFilePath()
+        {
+            string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TeamsStatusMonitor");
+            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+            return Path.Combine(dir, "TeamsStatusMonitor.log");
+        }
+
+        private string _lastLoggedMessage = "";
+
+        private void Log(string message)
+        {
+            if (message == _lastLoggedMessage) return; // Spam-Schutz
+            _lastLoggedMessage = message;
+            
+            try
+            {
+                string logPath = GetLogFilePath();
+                System.IO.File.AppendAllText(logPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}{Environment.NewLine}");
+            }
+            catch { }
+        }
+
         private string GetSettingsFilePath()
         {
             string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TeamsStatusMonitor");
@@ -382,102 +404,115 @@ namespace TeamsStatus
                 {
                     try
                     {
-                        // Automatische Erkennung des neuesten New Teams Logs
-                        string newTeamsLogPath = "";
-                        DateTime newWriteTime = DateTime.MinValue;
-
+                        // Sammle die relevanten Log-Dateien
+                        var filesToCheck = new System.Collections.Generic.List<FileInfo>();
+                        
                         if (Directory.Exists(newTeamsLogDir))
                         {
                             var logFiles = Directory.GetFiles(newTeamsLogDir, "MSTeams_*.log");
                             if (logFiles.Length > 0)
                             {
-                                var latestLog = logFiles.Select(f => new FileInfo(f)).OrderByDescending(f => f.LastWriteTime).First();
-                                newTeamsLogPath = latestLog.FullName;
-                                newWriteTime = latestLog.LastWriteTime;
+                                filesToCheck.AddRange(logFiles.Select(f => new FileInfo(f)).OrderByDescending(f => f.LastWriteTime).Take(3));
                             }
                         }
 
-                        // Automatische Erkennung für Classic Teams
-                        DateTime classicWriteTime = System.IO.File.Exists(classicLogPath) ? System.IO.File.GetLastWriteTime(classicLogPath) : DateTime.MinValue;
-
-                        if (classicWriteTime == DateTime.MinValue && newWriteTime == DateTime.MinValue)
+                        if (System.IO.File.Exists(classicLogPath))
                         {
+                            filesToCheck.Add(new FileInfo(classicLogPath));
+                        }
+
+                        if (filesToCheck.Count == 0)
+                        {
+                            Log("Es konnte keine Teams Logdatei (weder Classic noch New) gefunden werden.");
                             Dispatcher.Invoke(() => TxtStatus.Text = "Status: Weder Classic noch New Teams Log gefunden");
                             continue;
                         }
 
-                        // Wähle die Datei, die zuletzt beschrieben wurde
-                        string logPathToUse = newWriteTime > classicWriteTime ? newTeamsLogPath : classicLogPath;
-                        string teamsVersion = newWriteTime > classicWriteTime ? "New Teams" : "Classic Teams";
+                        // Sortiere alle gesammelten Dateien nach Dateinamen absteigend (neueste zuerst).
+                        // WICHTIG: Nutze f.Name statt LastWriteTime, da Windows bei offnenen Dateien die LastWriteTime oft nicht aktualisiert!
+                        filesToCheck = filesToCheck.OrderByDescending(f => f.Name).ToList();
 
-                        // FileShare.ReadWrite ist wichtig, da Teams die Datei offen hält
-                        using var stream = new FileStream(logPathToUse, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                        
-                        // Stream vor dem Erstellen des StreamReaders verschieben, sonst liefert der Puffer Müll!
-                        if (stream.Length > 131072) // 128 KB
+                        bool foundStatus = false;
+
+                        foreach (var logFile in filesToCheck)
                         {
-                            stream.Seek(-131072, SeekOrigin.End);
+                            try
+                            {
+                                // FileShare.ReadWrite ist wichtig, da Teams die Datei offen hält
+                                using var stream = new FileStream(logFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                                
+                                // Nur bei der alten classic "logs.txt" das Lesen auf 256 KB beschränken, da diese Datei 100+ MB werden kann.
+                                // Die New Teams Logs ("MSTeams_*.log") rotieren bei exakt 2 MB. Diese lesen wir komplett,
+                                // um zu verhindern, dass alte Statusmeldungen aus dem 256KB-Fenster rutschen.
+                                if (logFile.Name.ToLower() == "logs.txt" && stream.Length > 262144) 
+                                {
+                                    stream.Seek(-262144, SeekOrigin.End);
+                                }
+                                
+                                using var reader = new StreamReader(stream);
+                                // Nutze synchrones ReadToEnd() um Abbrüche bei asynchronen Datei-Leseoperationen (Overlapped I/O) durch Windows zu verhindern, wenn Teams gleichzeitig schreibt.
+                                string content = reader.ReadToEnd();
+                                
+                                // Lese relevante Status (ACHTUNG: UserPresenceAction und UserDataGlobalState wurden entfernt, da diese bei mehreren Accounts den Status des falschen Accounts ausgeben können!)
+                                int maxIndex = -1;
+                                string parsedStatus = "";
+
+                                // Check GlyphBadge (Lokales Taskleisten-Icon, absolut verlässlich und entspricht immer dem UI!)
+                                // Teams schreibt "doNotDistrb" (ohne 'u'), daher matchen wir generisch und filtern danach.
+                                var glyphBadgeMatches = System.Text.RegularExpressions.Regex.Matches(content, @"GlyphBadge\{\""([a-zA-Z]+)\""\}", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                                foreach (System.Text.RegularExpressions.Match m in glyphBadgeMatches)
+                                {
+                                    if (m.Index > maxIndex) 
+                                    { 
+                                        string gbStatus = m.Groups[1].Value.ToLower();
+                                        if (gbStatus.Contains("avail")) { maxIndex = m.Index; parsedStatus = "Available"; }
+                                        else if (gbStatus.Contains("busy") || gbStatus.Contains("meeting")) { maxIndex = m.Index; parsedStatus = "Busy"; }
+                                        else if (gbStatus.Contains("distrb") || gbStatus.Contains("disturb") || gbStatus.Contains("dnd")) { maxIndex = m.Index; parsedStatus = "DoNotDisturb"; }
+                                        else if (gbStatus.Contains("away")) { maxIndex = m.Index; parsedStatus = "Away"; }
+                                        else if (gbStatus.Contains("rightback") || gbStatus.Contains("brb")) { maxIndex = m.Index; parsedStatus = "BeRightBack"; }
+                                    }
+                                }
+
+                                if (maxIndex > -1)
+                                {
+                                    if (parsedStatus.Equals("Available", StringComparison.OrdinalIgnoreCase))
+                                        UpdateStatus("Auto: Verfügbar", 'A');
+                                    else if (parsedStatus == "DoNotDisturb" || parsedStatus == "dnd")
+                                        UpdateStatus("Auto: Nicht stören", 'D');
+                                    else if (parsedStatus == "Busy" || parsedStatus == "InAMeeting")
+                                        UpdateStatus("Auto: Beschäftigt", 'B');
+                                    else if (parsedStatus == "Away" || parsedStatus == "BeRightBack" || parsedStatus == "brb")
+                                        UpdateStatus("Auto: Abwesend", 'W');
+                                    
+                                    foundStatus = true;
+                                    break;
+                                }
+                            }
+                            catch (IOException ex)
+                            {
+                                Log($"Fehler beim Zugriff auf Datei {logFile.FullName}: {ex.Message}");
+                                // Falls diese Datei exklusiv gesperrt ist, probiere die nächste
+                                continue;
+                            }
+                            catch (Exception ex)
+                            {
+                                Log($"Unerwarteter Fehler beim Lesen von {logFile.FullName}: {ex.Message}");
+                                continue;
+                            }
                         }
-                        
-                        using var reader = new StreamReader(stream);
-                        string content = await reader.ReadToEndAsync(token);
 
-                        // Suche nach dem allerletzten Vorkommen eines Status in den gelesenen Daten (sowohl Classic als auch New Teams)
-                        int lastAvailable = Math.Max(
-                            content.LastIndexOf("StatusIndicatorStateService: Added Available"), 
-                            Math.Max(content.LastIndexOf("GlyphBadge{\"available\"}"), 
-                                     content.LastIndexOf("availability: Available")));
-                        
-                        int lastBusy = Math.Max(
-                            content.LastIndexOf("StatusIndicatorStateService: Added Busy"), 
-                            Math.Max(content.LastIndexOf("GlyphBadge{\"busy\"}"), 
-                                     content.LastIndexOf("availability: Busy")));
-
-                        int lastDnd = Math.Max(
-                            content.LastIndexOf("StatusIndicatorStateService: Added DoNotDisturb"), 
-                            Math.Max(content.LastIndexOf("GlyphBadge{\"dnd\"}"), 
-                                     content.LastIndexOf("availability: DoNotDisturb")));
-
-                        int lastMeeting = Math.Max(
-                            content.LastIndexOf("StatusIndicatorStateService: Added InAMeeting"), 
-                            Math.Max(content.LastIndexOf("GlyphBadge{\"in-a-meeting\"}"), 
-                                     content.LastIndexOf("availability: InAMeeting")));
-
-                        int lastAway = Math.Max(
-                            content.LastIndexOf("StatusIndicatorStateService: Added Away"), 
-                            Math.Max(content.LastIndexOf("GlyphBadge{\"away\"}"), 
-                                     content.LastIndexOf("availability: Away")));
-
-                        int lastBrb = Math.Max(
-                            content.LastIndexOf("StatusIndicatorStateService: Added BeRightBack"), 
-                            Math.Max(content.LastIndexOf("GlyphBadge{\"brb\"}"), 
-                                     content.LastIndexOf("availability: BeRightBack")));
-
-                        int maxIndex = Math.Max(lastAvailable, 
-                                       Math.Max(lastBusy, 
-                                       Math.Max(lastDnd, 
-                                       Math.Max(lastMeeting, 
-                                       Math.Max(lastAway, lastBrb)))));
-                        
-                        if (maxIndex > -1)
+                        if (!foundStatus)
                         {
-                            if (maxIndex == lastAvailable)
-                                UpdateStatus("Auto: Verfügbar", 'A');
-                            else if (maxIndex == lastDnd)
-                                UpdateStatus("Auto: Nicht stören", 'D');
-                            else if (maxIndex == lastMeeting)
-                                UpdateStatus("Auto: Im Termin", 'B'); 
-                            else if (maxIndex == lastBusy)
-                                UpdateStatus("Auto: Beschäftigt", 'B');
-                            else if (maxIndex == lastBrb)
-                                UpdateStatus("Auto: Gleich zurück", 'W');
-                            else if (maxIndex == lastAway)
-                                UpdateStatus("Auto: Abwesend", 'W');
+                            Log("In den überprüften Logdateien wurde kein bekannter Status gefunden.");
                         }
                     }
-                    catch (IOException)
+                    catch (IOException ex)
                     {
-                        // Wird geworfen, wenn die Datei kurzzeitig nicht lesbar ist -> ignorieren
+                        Log($"Allgemeiner IO-Fehler im Überwachungs-Loop: {ex.Message}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"Unerwarteter Fehler im Überwachungs-Loop: {ex.Message}");
                     }
                 }
             }

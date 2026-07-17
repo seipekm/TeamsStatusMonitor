@@ -12,7 +12,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         
-        <ui:TitleBar Title="Über Teams Status Monitor" Grid.Row="0" Margin="0" PreviewMouseLeftButtonDown="TitleBar_PreviewMouseLeftButtonDown" />
+        <ui:TitleBar Title="Über Teams Status Monitor" Grid.Row="0" Margin="0" ShowMaximize="False" PreviewMouseLeftButtonDown="TitleBar_PreviewMouseLeftButtonDown" />
         
         <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20">
             <ui:TextBlock Text="Teams Status Monitor" FontTypography="Title" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>

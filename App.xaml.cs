@@ -18,7 +18,39 @@ namespace TeamsStatus
             if (!createdNew)
             {
                 // App is already running!
-                MessageBox.Show("Teams Status Monitor läuft bereits im Hintergrund (siehe System-Tray).", "Bereits gestartet", MessageBoxButton.OK, MessageBoxImage.Information);
+                var win = new Wpf.Ui.Controls.FluentWindow
+                {
+                    Title = "Bereits gestartet",
+                    Width = 450,
+                    Height = 200,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    ResizeMode = ResizeMode.NoResize,
+                    ExtendsContentIntoTitleBar = true,
+                    WindowBackdropType = Wpf.Ui.Controls.WindowBackdropType.Mica
+                };
+
+                var grid = new System.Windows.Controls.Grid();
+                grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = GridLength.Auto });
+                grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+
+                var titleBar = new Wpf.Ui.Controls.TitleBar { Title = "Bereits gestartet", Margin = new Thickness(0) };
+                System.Windows.Controls.Grid.SetRow(titleBar, 0);
+                titleBar.PreviewMouseLeftButtonDown += (s, ev) => { if (ev.LeftButton == System.Windows.Input.MouseButtonState.Pressed) win.DragMove(); };
+                grid.Children.Add(titleBar);
+
+                var sp = new System.Windows.Controls.StackPanel { VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Center, Margin = new Thickness(20) };
+                System.Windows.Controls.Grid.SetRow(sp, 1);
+                
+                sp.Children.Add(new Wpf.Ui.Controls.TextBlock { Text = "Teams Status Monitor läuft bereits im Hintergrund.", Margin = new Thickness(0, 0, 0, 15) });
+                
+                var btn = new Wpf.Ui.Controls.Button { Content = "OK", Appearance = Wpf.Ui.Controls.ControlAppearance.Primary, HorizontalAlignment = HorizontalAlignment.Center, Width = 100 };
+                btn.Click += (s, ev) => win.Close();
+                sp.Children.Add(btn);
+
+                grid.Children.Add(sp);
+                win.Content = grid;
+                win.ShowDialog();
+                
                 Application.Current.Shutdown();
                 return;
             }

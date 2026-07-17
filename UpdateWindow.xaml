@@ -12,7 +12,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         
-        <ui:TitleBar Title="Update wird installiert..." Grid.Row="0" Margin="0" PreviewMouseLeftButtonDown="TitleBar_PreviewMouseLeftButtonDown" />
+        <ui:TitleBar Title="Update wird installiert..." Grid.Row="0" Margin="0" ShowMaximize="False" PreviewMouseLeftButtonDown="TitleBar_PreviewMouseLeftButtonDown" />
         
         <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Width="300" Margin="20">
             <ui:TextBlock x:Name="TxtStatus" Text="Update wird initialisiert..." FontTypography="BodyStrong" HorizontalAlignment="Center" Margin="0,0,0,15" TextAlignment="Center" TextWrapping="Wrap"/>

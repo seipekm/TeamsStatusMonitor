@@ -732,6 +732,12 @@ namespace TeamsStatus
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            // Fenstergröße auf den durch den Inhalt generierten Wert fixieren
+            this.MinWidth = this.ActualWidth;
+            this.MaxWidth = this.ActualWidth;
+            this.MinHeight = this.ActualHeight;
+            this.MaxHeight = this.ActualHeight;
+
             string[] args = Environment.GetCommandLineArgs();
             if (args.Contains("-updated"))
             {

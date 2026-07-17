@@ -38,5 +38,13 @@ namespace TeamsStatus
         {
             this.Close();
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.MinWidth = this.ActualWidth;
+            this.MaxWidth = this.ActualWidth;
+            this.MinHeight = this.ActualHeight;
+            this.MaxHeight = this.ActualHeight;
+        }
     }
 }

@@ -5,7 +5,7 @@
         Title="Über Teams Status Monitor" SizeToContent="WidthAndHeight"
         WindowBackdropType="Mica" ExtendsContentIntoTitleBar="True" WindowCornerPreference="Round"
         WindowStartupLocation="CenterOwner" ResizeMode="CanMinimize"
-        ShowInTaskbar="False">
+        ShowInTaskbar="False" Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

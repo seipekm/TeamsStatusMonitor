@@ -20,6 +20,11 @@ namespace TeamsStatus
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            this.MinWidth = this.ActualWidth;
+            this.MaxWidth = this.ActualWidth;
+            this.MinHeight = this.ActualHeight;
+            this.MaxHeight = this.ActualHeight;
+
             await DownloadAndInstallUpdateAsync();
         }
 

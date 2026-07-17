@@ -735,7 +735,19 @@ namespace TeamsStatus
         private void MenuItem_StatusBusy_Click(object sender, RoutedEventArgs e) => SetMode("B");
         private void MenuItem_StatusAway_Click(object sender, RoutedEventArgs e) => SetMode("W");
 
-        private async void MenuItem_Update_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_Update_Click(object sender, RoutedEventArgs e)
+        {
+            CheckForUpdates(true);
+        }
+
+        private void MenuItem_Info_Click(object sender, RoutedEventArgs e)
+        {
+            var infoWindow = new InfoWindow();
+            infoWindow.Owner = this;
+            infoWindow.ShowDialog();
+        }
+
+        private async void CheckForUpdates(bool showMessageIfUpToDate)
         {
             try
             {

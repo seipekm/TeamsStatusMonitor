@@ -578,8 +578,10 @@ namespace TeamsStatus
 
                 // COM-Objekt WScript.Shell per Reflection erstellen (späte Bindung),
                 // so sparen wir uns die COM-Referenz im Projekt, die in .NET Core oft Probleme macht.
-                Type t = Type.GetTypeFromProgID("WScript.Shell");
-                dynamic shell = Activator.CreateInstance(t);
+                Type? t = Type.GetTypeFromProgID("WScript.Shell");
+                if (t == null) throw new Exception("WScript.Shell Type nicht gefunden.");
+                dynamic? shell = Activator.CreateInstance(t);
+                if (shell == null) throw new Exception("WScript.Shell Instanz konnte nicht erstellt werden.");
                 dynamic shortcut = shell.CreateShortcut(shortcutPath);
                 
                 shortcut.TargetPath = exePath;
@@ -691,7 +693,7 @@ namespace TeamsStatus
                 string currentVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0.0";
                 
                 // In C# wird oft ein vierstelliger String zurückgegeben, wir vergleichen die Major.Minor.Build
-                if (Version.TryParse(version, out Version latestV) && Version.TryParse(currentVersion, out Version currentV))
+                if (Version.TryParse(version, out Version? latestV) && Version.TryParse(currentVersion, out Version? currentV) && latestV != null && currentV != null)
                 {
                     if (latestV > currentV)
                     {

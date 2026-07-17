@@ -733,10 +733,18 @@ namespace TeamsStatus
             {
                 Title = title,
                 Content = content,
-                PrimaryButtonText = isYesNo ? "Ja" : "OK",
-                CloseButtonText = isYesNo ? "Nein" : "",
                 ShowTitle = true
             };
+
+            if (isYesNo)
+            {
+                uiMessageBox.PrimaryButtonText = "Ja";
+                uiMessageBox.CloseButtonText = "Nein";
+            }
+            else
+            {
+                uiMessageBox.CloseButtonText = "OK";
+            }
 
             return await uiMessageBox.ShowDialogAsync();
         }

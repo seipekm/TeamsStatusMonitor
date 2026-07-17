@@ -35,11 +35,7 @@ namespace TeamsStatus
             catch { }
             
             // Check for update success
-            string[] args = Environment.GetCommandLineArgs();
-            if (args.Contains("-updated"))
-            {
-                MessageBox.Show("Das Update wurde erfolgreich installiert!", "Update erfolgreich", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
+            Loaded += MainWindow_Loaded;
             
             // Verhindert, dass die App geschlossen wird, wenn das Hauptfenster unsichtbar ist
             Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
@@ -203,7 +199,7 @@ namespace TeamsStatus
             if (_isConnected) DisconnectSerial();
         }
 
-        private void BtnConnect_Click(object sender, RoutedEventArgs e)
+        private async void BtnConnect_Click(object sender, RoutedEventArgs e)
         {
             if (_isConnected)
             {
@@ -211,11 +207,11 @@ namespace TeamsStatus
             }
             else
             {
-                ConnectSerial();
+                await ConnectSerial();
             }
         }
 
-        private void ConnectSerial()
+        private async Task ConnectSerial()
         {
             if (CmbPorts.SelectedItem == null) return;
             string port = CmbPorts.SelectedItem.ToString() ?? string.Empty;
@@ -238,7 +234,7 @@ namespace TeamsStatus
             catch (Exception ex)
             {
                 SetConnectionStatus(false);
-                MessageBox.Show($"Fehler beim Öffnen des COM-Ports: {ex.Message}");
+                await ShowFluentMessageBoxAsync("Fehler", $"Fehler beim Öffnen des COM-Ports: {ex.Message}");
             }
         }
 
@@ -649,7 +645,7 @@ namespace TeamsStatus
             return Path.Combine(startupDir, "TeamsStatusMonitor.lnk");
         }
 
-        private void BtnInstallAutostart_Click(object sender, RoutedEventArgs e)
+        private async void BtnInstallAutostart_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -675,15 +671,15 @@ namespace TeamsStatus
                 shortcut.Description = "Teams Status Monitor Autostart";
                 shortcut.Save();
 
-                MessageBox.Show("Autostart-Verknüpfung erfolgreich im Autostart-Ordner erstellt.", "Erfolg", MessageBoxButton.OK, MessageBoxImage.Information);
+                await ShowFluentMessageBoxAsync("Erfolg", "Autostart-Verknüpfung erfolgreich im Autostart-Ordner erstellt.");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Fehler beim Erstellen der Verknüpfung: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                await ShowFluentMessageBoxAsync("Fehler", $"Fehler beim Erstellen der Verknüpfung: {ex.Message}");
             }
         }
 
-        private void BtnUninstallAutostart_Click(object sender, RoutedEventArgs e)
+        private async void BtnUninstallAutostart_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -691,16 +687,16 @@ namespace TeamsStatus
                 if (System.IO.File.Exists(shortcutPath))
                 {
                     System.IO.File.Delete(shortcutPath);
-                    MessageBox.Show("Autostart-Verknüpfung wurde entfernt.", "Erfolg", MessageBoxButton.OK, MessageBoxImage.Information);
+                    await ShowFluentMessageBoxAsync("Erfolg", "Autostart-Verknüpfung wurde entfernt.");
                 }
                 else
                 {
-                    MessageBox.Show("Es wurde keine Autostart-Verknüpfung gefunden.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                    await ShowFluentMessageBoxAsync("Info", "Es wurde keine Autostart-Verknüpfung gefunden.");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Fehler beim Entfernen der Verknüpfung: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                await ShowFluentMessageBoxAsync("Fehler", $"Fehler beim Entfernen der Verknüpfung: {ex.Message}");
             }
         }
 
@@ -715,7 +711,34 @@ namespace TeamsStatus
         {
             this.Show();
             this.WindowState = WindowState.Normal;
-            this.Activate();
+            _isLoaded = true;
+        }
+
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Contains("-updated"))
+            {
+                await ShowFluentMessageBoxAsync("Update erfolgreich", "Das Update wurde erfolgreich installiert!");
+            }
+            else
+            {
+                CheckForUpdates(false);
+            }
+        }
+
+        private async Task<Wpf.Ui.Controls.MessageBoxResult> ShowFluentMessageBoxAsync(string title, string content, bool isYesNo = false)
+        {
+            var uiMessageBox = new Wpf.Ui.Controls.MessageBox
+            {
+                Title = title,
+                Content = content,
+                PrimaryButtonText = isYesNo ? "Ja" : "OK",
+                CloseButtonText = isYesNo ? "Nein" : "",
+                ShowTitle = true
+            };
+
+            return await uiMessageBox.ShowDialogAsync();
         }
 
         private void MenuItem_Exit_Click(object sender, RoutedEventArgs e)
@@ -724,27 +747,23 @@ namespace TeamsStatus
             Application.Current.Shutdown();
         }
 
-        private void MenuItem_OpenLog_Click(object sender, RoutedEventArgs e)
+        private async void MenuItem_OpenLog_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 string logPath = GetLogFilePath();
                 if (System.IO.File.Exists(logPath))
                 {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = logPath,
-                        UseShellExecute = true
-                    });
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(logPath) { UseShellExecute = true });
                 }
                 else
                 {
-                    MessageBox.Show("Die Log-Datei existiert noch nicht.", "Hinweis", MessageBoxButton.OK, MessageBoxImage.Information);
+                    await ShowFluentMessageBoxAsync("Hinweis", "Die Log-Datei existiert noch nicht.");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Fehler beim Öffnen der Log-Datei: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                await ShowFluentMessageBoxAsync("Fehler", $"Fehler beim Öffnen der Log-Datei: {ex.Message}");
             }
         }
 
@@ -776,7 +795,8 @@ namespace TeamsStatus
                 var response = await client.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show("Keine Verbindung zu GitHub möglich.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                    if (showMessageIfUpToDate)
+                        await ShowFluentMessageBoxAsync("Fehler", "Keine Verbindung zu GitHub möglich.");
                     return;
                 }
                 
@@ -794,8 +814,8 @@ namespace TeamsStatus
                 {
                     if (latestV > currentV)
                     {
-                        var result = MessageBox.Show($"Ein Update auf Version {version} ist verfügbar!\nJetzt herunterladen und installieren?", "Update verfügbar", MessageBoxButton.YesNo, MessageBoxImage.Information);
-                        if (result == MessageBoxResult.Yes)
+                        var result = await ShowFluentMessageBoxAsync("Update verfügbar", $"Ein Update auf Version {version} ist verfügbar!\nJetzt herunterladen und installieren?", true);
+                        if (result == Wpf.Ui.Controls.MessageBoxResult.Primary)
                         {
                             string downloadUrl = "";
                             if (root.TryGetProperty("assets", out JsonElement assets))
@@ -818,19 +838,21 @@ namespace TeamsStatus
                             }
                             else
                             {
-                                MessageBox.Show("Das Update-Paket (ZIP) konnte im Release nicht gefunden werden.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                                await ShowFluentMessageBoxAsync("Fehler", "Das Update-Paket (ZIP) konnte im Release nicht gefunden werden.");
                             }
                         }
                     }
                     else
                     {
-                        MessageBox.Show($"Die App ist bereits auf dem neuesten Stand (Version {currentVersion}).", "Kein Update", MessageBoxButton.OK, MessageBoxImage.Information);
+                        if (showMessageIfUpToDate)
+                            await ShowFluentMessageBoxAsync("Kein Update", $"Die App ist bereits auf dem neuesten Stand (Version {currentVersion}).");
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Fehler bei der Update-Prüfung: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (showMessageIfUpToDate)
+                    await ShowFluentMessageBoxAsync("Fehler", $"Fehler bei der Update-Prüfung: {ex.Message}");
             }
         }
 

@@ -122,7 +122,15 @@ del ""%~f0""
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Fehler bei der Update-Installation: {ex.Message}", "Fehler", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                var uiMessageBox = new Wpf.Ui.Controls.MessageBox
+                {
+                    Title = "Fehler",
+                    Content = $"Fehler bei der Update-Installation: {ex.Message}",
+                    CloseButtonText = "OK",
+                    ShowTitle = true
+                };
+                await uiMessageBox.ShowDialogAsync();
+                
                 this.Close();
             }
         }

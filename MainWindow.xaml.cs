@@ -22,6 +22,7 @@ namespace TeamsStatus
         private System.Windows.Threading.DispatcherTimer _sendTimer;
         private bool _isLoaded = false;
         private bool _isConnected = false;
+        private string _currentMode = "Auto";
 
         public MainWindow()
         {
@@ -52,7 +53,27 @@ namespace TeamsStatus
             LoadSettings();
             _isLoaded = true;
             ConnectSerial(); // Automatisch beim Start mit den geladenen Settings verbinden
-            BtnMode_Click(BtnModeAuto, new RoutedEventArgs()); // Standard: Auto-Modus
+            
+            // Start im zuletzt gespeicherten Modus
+            if (_currentMode == "Auto" && !string.IsNullOrEmpty(_lastStatus) && _lastStatus != "U")
+            {
+                // Wenn Auto-Modus und wir einen alten Status haben, starte Monitoring, aber überschreibe nicht mit "Suche Log..."
+                BtnModeAuto.Background = Brushes.LightBlue;
+                MenuStatusAuto.IsChecked = true;
+                StartMonitoring();
+                
+                string savedText = _lastUiStatusText;
+                char savedCmd = _lastStatus[0];
+                _lastStatus = "";
+                _lastUiStatusText = "";
+                UpdateStatus(savedText, savedCmd);
+            }
+            else
+            {
+                string savedMode = _currentMode;
+                _currentMode = ""; // Force update
+                SetMode(savedMode); 
+            }
         }
 
         private void LoadPorts()
@@ -100,7 +121,10 @@ namespace TeamsStatus
                 {
                     PortName = CmbPorts.SelectedItem?.ToString() ?? "",
                     BaudRate = (CmbBaudRate.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "9600",
-                    Brightness = SldBrightness.Value
+                    Brightness = SldBrightness.Value,
+                    CurrentMode = _currentMode,
+                    LastStatus = _lastStatus,
+                    LastStatusText = _lastUiStatusText
                 };
                 string json = JsonSerializer.Serialize(settings);
                 System.IO.File.WriteAllText(GetSettingsFilePath(), json);
@@ -142,6 +166,18 @@ namespace TeamsStatus
                         {
                             CmbPorts.SelectedItem = savedPort;
                         }
+                    }
+                    if (root.TryGetProperty("CurrentMode", out var cm))
+                    {
+                        _currentMode = cm.GetString() ?? "Auto";
+                    }
+                    if (root.TryGetProperty("LastStatus", out var ls))
+                    {
+                        _lastStatus = ls.GetString() ?? "";
+                    }
+                    if (root.TryGetProperty("LastStatusText", out var lst))
+                    {
+                        _lastUiStatusText = lst.GetString() ?? "";
                     }
                 }
             }
@@ -253,6 +289,9 @@ namespace TeamsStatus
 
         private void SetMode(string tag)
         {
+            _currentMode = tag;
+            SaveSettings();
+
             // Reset all buttons and menus
             BtnModeAuto.Background = SystemColors.ControlBrush;
             BtnModeAvailable.Background = SystemColors.ControlBrush;
@@ -310,6 +349,8 @@ namespace TeamsStatus
             
             _lastStatus = command.ToString();
             _lastUiStatusText = statusText;
+            SaveSettings();
+            
             // Dispatcher wird benötigt, falls das Event aus einem Hintergrund-Task (Auto) kommt
             Dispatcher.Invoke(() => 
             {

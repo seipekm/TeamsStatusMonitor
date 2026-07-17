@@ -4,10 +4,17 @@
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         Title="Update wird installiert..." Height="200" Width="400"
         WindowBackdropType="Mica" ExtendsContentIntoTitleBar="True" WindowCornerPreference="Round"
-        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanMinimize" ShowInTaskbar="False"
         Loaded="Window_Loaded">
-    <Grid Margin="20">
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
+        <ui:TitleBar Title="Update wird installiert..." Grid.Row="0" Margin="0" />
+        
+        <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Width="300" Margin="20">
             <ui:TextBlock x:Name="TxtStatus" Text="Update wird initialisiert..." FontTypography="BodyStrong" HorizontalAlignment="Center" Margin="0,0,0,15" TextAlignment="Center" TextWrapping="Wrap"/>
             <ProgressBar x:Name="ProgressDownload" Minimum="0" Maximum="100" Height="20" Margin="0,0,0,10"/>
             <ui:TextBlock x:Name="TxtDetail" Text="0 %" FontTypography="Caption" Appearance="Secondary" HorizontalAlignment="Center"/>

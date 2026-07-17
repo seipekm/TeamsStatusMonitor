@@ -4,10 +4,17 @@
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         Title="Über Teams Status Monitor" SizeToContent="WidthAndHeight"
         WindowBackdropType="Mica" ExtendsContentIntoTitleBar="True" WindowCornerPreference="Round"
-        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanMinimize"
         ShowInTaskbar="False">
-    <Grid Margin="20">
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
+        <ui:TitleBar Title="Über Teams Status Monitor" Grid.Row="0" Margin="0" />
+        
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20">
             <ui:TextBlock Text="Teams Status Monitor" FontTypography="Title" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
             
             <ui:TextBlock x:Name="TxtVersion" Text="Version: 1.0.0" FontTypography="Body" Appearance="Secondary" HorizontalAlignment="Center" Margin="0,0,0,15"/>

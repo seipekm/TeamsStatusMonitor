@@ -749,6 +749,14 @@ namespace TeamsStatus
             }
         }
 
+        private void TitleBar_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
+            {
+                DragMove();
+            }
+        }
+
         private async Task<Wpf.Ui.Controls.MessageBoxResult> ShowFluentMessageBoxAsync(string title, string content, bool isYesNo = false)
         {
             var uiMessageBox = new Wpf.Ui.Controls.MessageBox

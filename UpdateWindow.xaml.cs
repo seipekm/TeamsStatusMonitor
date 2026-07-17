@@ -28,6 +28,15 @@ namespace TeamsStatus
             await DownloadAndInstallUpdateAsync();
         }
 
+        private void TitleBar_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
+            {
+                DragMove();
+            }
+        }
+
+
         private async Task DownloadAndInstallUpdateAsync()
         {
             try

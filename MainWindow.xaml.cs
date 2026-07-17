@@ -58,7 +58,7 @@ namespace TeamsStatus
             if (_currentMode == "Auto" && !string.IsNullOrEmpty(_lastStatus) && _lastStatus != "U")
             {
                 // Wenn Auto-Modus und wir einen alten Status haben, starte Monitoring, aber überschreibe nicht mit "Suche Log..."
-                BtnModeAuto.Background = Brushes.LightBlue;
+                BtnModeAuto.Appearance = Wpf.Ui.Controls.ControlAppearance.Primary;
                 MenuStatusAuto.IsChecked = true;
                 StartMonitoring();
                 
@@ -293,10 +293,10 @@ namespace TeamsStatus
             SaveSettings();
 
             // Reset all buttons and menus
-            BtnModeAuto.Background = SystemColors.ControlBrush;
-            BtnModeAvailable.Background = SystemColors.ControlBrush;
-            BtnModeBusy.Background = SystemColors.ControlBrush;
-            BtnModeAway.Background = SystemColors.ControlBrush;
+            BtnModeAuto.Appearance = Wpf.Ui.Controls.ControlAppearance.Secondary;
+            BtnModeAvailable.Appearance = Wpf.Ui.Controls.ControlAppearance.Secondary;
+            BtnModeBusy.Appearance = Wpf.Ui.Controls.ControlAppearance.Secondary;
+            BtnModeAway.Appearance = Wpf.Ui.Controls.ControlAppearance.Secondary;
 
             MenuStatusAuto.IsChecked = false;
             MenuStatusAvailable.IsChecked = false;
@@ -305,22 +305,22 @@ namespace TeamsStatus
 
             if (tag == "Auto") 
             {
-                BtnModeAuto.Background = Brushes.LightBlue;
+                BtnModeAuto.Appearance = Wpf.Ui.Controls.ControlAppearance.Primary;
                 MenuStatusAuto.IsChecked = true;
             }
             else if (tag == "A") 
             {
-                BtnModeAvailable.Background = Brushes.LightBlue;
+                BtnModeAvailable.Appearance = Wpf.Ui.Controls.ControlAppearance.Primary;
                 MenuStatusAvailable.IsChecked = true;
             }
             else if (tag == "B") 
             {
-                BtnModeBusy.Background = Brushes.LightBlue;
+                BtnModeBusy.Appearance = Wpf.Ui.Controls.ControlAppearance.Primary;
                 MenuStatusBusy.IsChecked = true;
             }
             else if (tag == "W") 
             {
-                BtnModeAway.Background = Brushes.LightBlue;
+                BtnModeAway.Appearance = Wpf.Ui.Controls.ControlAppearance.Primary;
                 MenuStatusAway.IsChecked = true;
             }
 

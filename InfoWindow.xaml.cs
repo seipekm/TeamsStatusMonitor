@@ -5,7 +5,7 @@ using System.Windows.Navigation;
 
 namespace TeamsStatus
 {
-    public partial class InfoWindow : Window
+    public partial class InfoWindow : Wpf.Ui.Controls.FluentWindow
     {
         public InfoWindow()
         {

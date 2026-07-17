@@ -14,7 +14,7 @@ using System.IO.Compression;
 
 namespace TeamsStatus
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     {
         private SerialPort? _serialPort;
         private CancellationTokenSource? _cts;

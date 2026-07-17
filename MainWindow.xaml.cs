@@ -279,9 +279,13 @@ namespace TeamsStatus
                 }
                 
                 // Force tray icon update
-                if (StatusIcon != null)
+                if (StatusInfoBar != null)
                 {
-                    UpdateTrayIcon((SolidColorBrush)StatusIcon.Fill);
+                    Brush brush = Brushes.Gray;
+                    if (StatusInfoBar.Severity == Wpf.Ui.Controls.InfoBarSeverity.Success) brush = Brushes.LimeGreen;
+                    else if (StatusInfoBar.Severity == Wpf.Ui.Controls.InfoBarSeverity.Warning) brush = Brushes.Orange;
+                    else if (StatusInfoBar.Severity == Wpf.Ui.Controls.InfoBarSeverity.Error) brush = _lastStatus == "B" ? Brushes.Red : Brushes.DarkRed; // "B" is Busy/Red, "D" is DND/DarkRed
+                    UpdateTrayIcon(brush);
                 }
             });
         }
@@ -360,16 +364,35 @@ namespace TeamsStatus
             // Dispatcher wird benötigt, falls das Event aus einem Hintergrund-Task (Auto) kommt
             Dispatcher.Invoke(() => 
             {
-                TxtStatus.Text = $"Status: {statusText}";
+                StatusInfoBar.Message = statusText;
                 
                 // Icon Farbe aktualisieren
                 Brush fillBrush = Brushes.Gray;
-                if (command == 'A') fillBrush = Brushes.LimeGreen;
-                else if (command == 'B') fillBrush = Brushes.Red;
-                else if (command == 'D') fillBrush = Brushes.DarkRed;
-                else if (command == 'W') fillBrush = Brushes.Orange;
+                if (command == 'A')
+                {
+                    fillBrush = Brushes.LimeGreen;
+                    StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Success;
+                }
+                else if (command == 'B')
+                {
+                    fillBrush = Brushes.Red;
+                    StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
+                }
+                else if (command == 'D')
+                {
+                    fillBrush = Brushes.DarkRed;
+                    StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
+                }
+                else if (command == 'W')
+                {
+                    fillBrush = Brushes.Orange;
+                    StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Warning;
+                }
+                else
+                {
+                    StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Informational;
+                }
                 
-                StatusIcon.Fill = fillBrush;
                 UpdateTrayIcon(fillBrush);
             });
             SendStatus(_lastStatus);
@@ -526,7 +549,11 @@ namespace TeamsStatus
                         if (filesToCheck.Count == 0)
                         {
                             Log("Es konnte keine New Teams Logdatei gefunden werden.");
-                            Dispatcher.Invoke(() => TxtStatus.Text = "Status: New Teams Log nicht gefunden");
+                            Dispatcher.Invoke(() => 
+                            {
+                                StatusInfoBar.Message = "New Teams Log nicht gefunden";
+                                StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
+                            });
                             continue;
                         }
 

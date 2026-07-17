@@ -82,10 +82,7 @@
                 <ui:Button x:Name="BtnModeAway" Content="Abwesend" Click="BtnMode_Click" Tag="W" Padding="8,4" Margin="0,0,5,0" />
             </StackPanel>
 
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,20" VerticalAlignment="Center">
-                <Ellipse x:Name="StatusIcon" Width="16" Height="16" Fill="Gray" Margin="0,0,8,0" Stroke="DarkGray" StrokeThickness="1"/>
-                <ui:TextBlock x:Name="TxtStatus" Text="Status: Unbekannt" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-            </StackPanel>
+            <ui:InfoBar x:Name="StatusInfoBar" Title="Status:" Message="Unbekannt" Severity="Informational" IsOpen="True" IsClosable="False" Margin="0,0,0,20"/>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <ui:Button Content="Autostart installieren" Icon="{ui:SymbolIcon Add24}" Click="BtnInstallAutostart_Click" Margin="0,0,10,0" Padding="15,5"/>

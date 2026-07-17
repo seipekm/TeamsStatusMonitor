@@ -794,7 +794,9 @@ namespace TeamsStatus
                             
                             if (!string.IsNullOrEmpty(downloadUrl))
                             {
-                                await DownloadAndInstallUpdateAsync(downloadUrl);
+                                var updateWindow = new UpdateWindow(downloadUrl);
+                                updateWindow.Owner = this;
+                                updateWindow.ShowDialog();
                             }
                             else
                             {
@@ -814,64 +816,6 @@ namespace TeamsStatus
             }
         }
 
-        private async Task DownloadAndInstallUpdateAsync(string downloadUrl)
-        {
-            try
-            {
-                string tempDir = Path.Combine(Path.GetTempPath(), "TeamsStatusMonitorUpdate");
-                if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
-                Directory.CreateDirectory(tempDir);
-                
-                string zipPath = Path.Combine(tempDir, "update.zip");
-                
-                using (var client = new HttpClient())
-                {
-                    var zipBytes = await client.GetByteArrayAsync(downloadUrl);
-                    await File.WriteAllBytesAsync(zipPath, zipBytes);
-                }
-                
-                ZipFile.ExtractToDirectory(zipPath, tempDir, true);
-                
-                string currentExe = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? "";
-                string extractedExe = Path.Combine(tempDir, "TeamsStatus.exe");
-                
-                if (File.Exists(extractedExe) && !string.IsNullOrEmpty(currentExe))
-                {
-                    string batPath = Path.Combine(tempDir, "update.bat");
-                    string batContent = $@"@echo off
-:waitloop
-tasklist | find /i ""TeamsStatus.exe"" >nul 2>&1
-if not errorlevel 1 (
-    timeout /t 1 /nobreak > NUL
-    goto waitloop
-)
-move /y ""{extractedExe}"" ""{currentExe}""
-start """" ""{currentExe}"" -updated
-del ""%~f0""
-";
-                    File.WriteAllText(batPath, batContent);
-                    
-                    var psi = new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = batPath,
-                        UseShellExecute = true,
-                        CreateNoWindow = true,
-                        WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
-                    };
-                    System.Diagnostics.Process.Start(psi);
-                    
-                    Application.Current.Shutdown();
-                }
-                else
-                {
-                    MessageBox.Show("Die heruntergeladene .exe wurde im ZIP nicht gefunden.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Fehler bei der Update-Installation: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
 
         private void MyNotifyIcon_TrayMouseDoubleClick(object sender, RoutedEventArgs e)
         {

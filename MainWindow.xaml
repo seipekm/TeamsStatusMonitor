@@ -14,6 +14,15 @@
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Öffnen" Click="MenuItem_Open_Click" />
+                    <MenuItem Header="Status manuell setzen">
+                        <MenuItem x:Name="MenuStatusAuto" Header="Auto (Teams)" Click="MenuItem_StatusAuto_Click" IsCheckable="True" IsChecked="True" />
+                        <MenuItem x:Name="MenuStatusAvailable" Header="Verfügbar" Click="MenuItem_StatusAvailable_Click" IsCheckable="True" />
+                        <MenuItem x:Name="MenuStatusBusy" Header="Beschäftigt" Click="MenuItem_StatusBusy_Click" IsCheckable="True" />
+                        <MenuItem x:Name="MenuStatusAway" Header="Abwesend" Click="MenuItem_StatusAway_Click" IsCheckable="True" />
+                    </MenuItem>
+                    <Separator />
+                    <MenuItem Header="Nach Updates suchen..." Click="MenuItem_Update_Click" />
+                    <Separator />
                     <MenuItem Header="Beenden" Click="MenuItem_Exit_Click" />
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>

@@ -9,6 +9,8 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Text.Json;
+using System.Net.Http;
+using System.IO.Compression;
 
 namespace TeamsStatus
 {
@@ -238,16 +240,43 @@ namespace TeamsStatus
         private void BtnMode_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button btn) return;
+            string tag = btn.Tag?.ToString() ?? "Auto";
+            SetMode(tag);
+        }
 
-            // Reset all buttons
+        private void SetMode(string tag)
+        {
+            // Reset all buttons and menus
             BtnModeAuto.Background = SystemColors.ControlBrush;
             BtnModeAvailable.Background = SystemColors.ControlBrush;
             BtnModeBusy.Background = SystemColors.ControlBrush;
             BtnModeAway.Background = SystemColors.ControlBrush;
 
-            btn.Background = Brushes.LightBlue;
+            MenuStatusAuto.IsChecked = false;
+            MenuStatusAvailable.IsChecked = false;
+            MenuStatusBusy.IsChecked = false;
+            MenuStatusAway.IsChecked = false;
 
-            string tag = btn.Tag?.ToString() ?? "Auto";
+            if (tag == "Auto") 
+            {
+                BtnModeAuto.Background = Brushes.LightBlue;
+                MenuStatusAuto.IsChecked = true;
+            }
+            else if (tag == "A") 
+            {
+                BtnModeAvailable.Background = Brushes.LightBlue;
+                MenuStatusAvailable.IsChecked = true;
+            }
+            else if (tag == "B") 
+            {
+                BtnModeBusy.Background = Brushes.LightBlue;
+                MenuStatusBusy.IsChecked = true;
+            }
+            else if (tag == "W") 
+            {
+                BtnModeAway.Background = Brushes.LightBlue;
+                MenuStatusAway.IsChecked = true;
+            }
 
             if (tag == "Auto")
             {
@@ -598,11 +627,133 @@ namespace TeamsStatus
         private void MenuItem_Exit_Click(object sender, RoutedEventArgs e)
         {
             StopMonitoring();
-            SaveSettings();
-            DisconnectSerial();
-
-            MyNotifyIcon.Dispose();
             Application.Current.Shutdown();
+        }
+
+        private void MenuItem_StatusAuto_Click(object sender, RoutedEventArgs e) => SetMode("Auto");
+        private void MenuItem_StatusAvailable_Click(object sender, RoutedEventArgs e) => SetMode("A");
+        private void MenuItem_StatusBusy_Click(object sender, RoutedEventArgs e) => SetMode("B");
+        private void MenuItem_StatusAway_Click(object sender, RoutedEventArgs e) => SetMode("W");
+
+        private async void MenuItem_Update_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                using var client = new HttpClient();
+                client.DefaultRequestHeaders.Add("User-Agent", "TeamsStatusMonitor");
+                
+                string url = "https://api.github.com/repos/seipekm/TeamsStatusMonitor/releases/latest";
+                var response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Keine Verbindung zu GitHub möglich.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                
+                string json = await response.Content.ReadAsStringAsync();
+                using JsonDocument doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+                string tag = root.GetProperty("tag_name").GetString() ?? "";
+                string version = tag.TrimStart('v');
+                
+                // Aktuelle Version abfragen
+                string currentVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0.0";
+                
+                // In C# wird oft ein vierstelliger String zurückgegeben, wir vergleichen die Major.Minor.Build
+                if (Version.TryParse(version, out Version latestV) && Version.TryParse(currentVersion, out Version currentV))
+                {
+                    if (latestV > currentV)
+                    {
+                        var result = MessageBox.Show($"Ein Update auf Version {version} ist verfügbar!\nJetzt herunterladen und installieren?", "Update verfügbar", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                        if (result == MessageBoxResult.Yes)
+                        {
+                            string downloadUrl = "";
+                            if (root.TryGetProperty("assets", out JsonElement assets))
+                            {
+                                foreach (var asset in assets.EnumerateArray())
+                                {
+                                    if (asset.GetProperty("name").GetString() == "TeamsStatusMonitor_Windows_x64.zip")
+                                    {
+                                        downloadUrl = asset.GetProperty("browser_download_url").GetString() ?? "";
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if (!string.IsNullOrEmpty(downloadUrl))
+                            {
+                                await DownloadAndInstallUpdateAsync(downloadUrl);
+                            }
+                            else
+                            {
+                                MessageBox.Show("Das Update-Paket (ZIP) konnte im Release nicht gefunden werden.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Die App ist bereits auf dem neuesten Stand (Version {currentVersion}).", "Kein Update", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fehler bei der Update-Prüfung: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task DownloadAndInstallUpdateAsync(string downloadUrl)
+        {
+            try
+            {
+                string tempDir = Path.Combine(Path.GetTempPath(), "TeamsStatusMonitorUpdate");
+                if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
+                Directory.CreateDirectory(tempDir);
+                
+                string zipPath = Path.Combine(tempDir, "update.zip");
+                
+                using (var client = new HttpClient())
+                {
+                    var zipBytes = await client.GetByteArrayAsync(downloadUrl);
+                    await File.WriteAllBytesAsync(zipPath, zipBytes);
+                }
+                
+                ZipFile.ExtractToDirectory(zipPath, tempDir, true);
+                
+                string currentExe = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? "";
+                string extractedExe = Path.Combine(tempDir, "TeamsStatus.exe");
+                
+                if (File.Exists(extractedExe) && !string.IsNullOrEmpty(currentExe))
+                {
+                    string batPath = Path.Combine(tempDir, "update.bat");
+                    string batContent = $@"@echo off
+timeout /t 2 /nobreak > NUL
+move /y ""{extractedExe}"" ""{currentExe}""
+start """" ""{currentExe}""
+del ""%~f0""
+";
+                    File.WriteAllText(batPath, batContent);
+                    
+                    var psi = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = batPath,
+                        UseShellExecute = true,
+                        CreateNoWindow = true,
+                        WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+                    };
+                    System.Diagnostics.Process.Start(psi);
+                    
+                    Application.Current.Shutdown();
+                }
+                else
+                {
+                    MessageBox.Show("Die heruntergeladene .exe wurde im ZIP nicht gefunden.", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fehler bei der Update-Installation: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void MyNotifyIcon_TrayMouseDoubleClick(object sender, RoutedEventArgs e)

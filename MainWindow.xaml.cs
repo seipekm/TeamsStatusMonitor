@@ -27,6 +27,13 @@ namespace TeamsStatus
         {
             InitializeComponent();
             
+            // Check for update success
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Contains("-updated"))
+            {
+                MessageBox.Show("Das Update wurde erfolgreich installiert!", "Update erfolgreich", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            
             // Verhindert, dass die App geschlossen wird, wenn das Hauptfenster unsichtbar ist
             Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
@@ -727,9 +734,14 @@ namespace TeamsStatus
                 {
                     string batPath = Path.Combine(tempDir, "update.bat");
                     string batContent = $@"@echo off
-timeout /t 2 /nobreak > NUL
+:waitloop
+tasklist | find /i ""TeamsStatus.exe"" >nul 2>&1
+if not errorlevel 1 (
+    timeout /t 1 /nobreak > NUL
+    goto waitloop
+)
 move /y ""{extractedExe}"" ""{currentExe}""
-start """" ""{currentExe}""
+start """" ""{currentExe}"" -updated
 del ""%~f0""
 ";
                     File.WriteAllText(batPath, batContent);

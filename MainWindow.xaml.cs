@@ -10,7 +10,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Text.Json;
 using System.Net.Http;
-using System.IO.Compression;
 
 namespace TeamsStatus
 {
@@ -494,8 +493,6 @@ namespace TeamsStatus
         private async Task MonitorTeamsLogAsync(CancellationToken token)
         {
             // Ordner-Pfade
-            string classicLogDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Microsoft", "Teams");
-            string classicLogPath = Path.Combine(classicLogDir, "logs.txt");
             string newTeamsLogDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Packages", "MSTeams_8wekyb3d8bbwe", "LocalCache", "Microsoft", "MSTeams", "Logs");
 
             // PeriodicTimer zum regelmäßigen Überprüfen (500ms = extrem schnell, aber zuverlässig!)
@@ -519,15 +516,10 @@ namespace TeamsStatus
                             }
                         }
 
-                        if (System.IO.File.Exists(classicLogPath))
-                        {
-                            filesToCheck.Add(new FileInfo(classicLogPath));
-                        }
-
                         if (filesToCheck.Count == 0)
                         {
-                            Log("Es konnte keine Teams Logdatei (weder Classic noch New) gefunden werden.");
-                            Dispatcher.Invoke(() => TxtStatus.Text = "Status: Weder Classic noch New Teams Log gefunden");
+                            Log("Es konnte keine New Teams Logdatei gefunden werden.");
+                            Dispatcher.Invoke(() => TxtStatus.Text = "Status: New Teams Log nicht gefunden");
                             continue;
                         }
 
@@ -543,14 +535,6 @@ namespace TeamsStatus
                             {
                                 // FileShare.ReadWrite ist wichtig, da Teams die Datei offen hält
                                 using var stream = new FileStream(logFile.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                                
-                                // Nur bei der alten classic "logs.txt" das Lesen auf 256 KB beschränken, da diese Datei 100+ MB werden kann.
-                                // Die New Teams Logs ("MSTeams_*.log") rotieren bei exakt 2 MB. Diese lesen wir komplett,
-                                // um zu verhindern, dass alte Statusmeldungen aus dem 256KB-Fenster rutschen.
-                                if (logFile.Name.ToLower() == "logs.txt" && stream.Length > 262144) 
-                                {
-                                    stream.Seek(-262144, SeekOrigin.End);
-                                }
                                 
                                 using var reader = new StreamReader(stream);
                                 // Nutze synchrones ReadToEnd() um Abbrüche bei asynchronen Datei-Leseoperationen (Overlapped I/O) durch Windows zu verhindern, wenn Teams gleichzeitig schreibt.

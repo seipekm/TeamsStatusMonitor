@@ -299,9 +299,17 @@ namespace TeamsStatus
             }
         }
 
+        private string _lastUiStatusText = "";
+
         private void UpdateStatus(string statusText, char command)
         {
+            if (_lastStatus == command.ToString() && _lastUiStatusText == statusText)
+            {
+                return; // Status hat sich nicht geändert, kein UI-Update notwendig
+            }
+            
             _lastStatus = command.ToString();
+            _lastUiStatusText = statusText;
             // Dispatcher wird benötigt, falls das Event aus einem Hintergrund-Task (Auto) kommt
             Dispatcher.Invoke(() => 
             {
@@ -349,10 +357,27 @@ namespace TeamsStatus
                     }
                 }
                 
-                IntPtr hIcon = bmp.GetHicon();
-                MyNotifyIcon.Icon = System.Drawing.Icon.FromHandle(hIcon);
+                IntPtr newHandle = bmp.GetHicon();
+                var newIcon = System.Drawing.Icon.FromHandle(newHandle);
+                
+                MyNotifyIcon.Icon = newIcon;
+                
+                if (_currentTrayIcon != null)
+                {
+                    _currentTrayIcon.Dispose();
+                    DestroyIcon(_currentTrayIconHandle);
+                }
+                
+                _currentTrayIcon = newIcon;
+                _currentTrayIconHandle = newHandle;
             }
         }
+
+        private System.Drawing.Icon? _currentTrayIcon;
+        private IntPtr _currentTrayIconHandle = IntPtr.Zero;
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+        extern static bool DestroyIcon(IntPtr handle);
 
         private void SldBrightness_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {

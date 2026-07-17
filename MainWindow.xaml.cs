@@ -364,29 +364,45 @@ namespace TeamsStatus
                 
                 // Icon Farbe aktualisieren
                 Brush fillBrush = Brushes.Gray;
+                Wpf.Ui.Controls.SymbolRegular symbol = Wpf.Ui.Controls.SymbolRegular.QuestionCircle24;
+                
                 if (command == 'A')
                 {
                     fillBrush = Brushes.LimeGreen;
                     StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Success;
+                    symbol = Wpf.Ui.Controls.SymbolRegular.CheckmarkCircle24;
                 }
                 else if (command == 'B')
                 {
                     fillBrush = Brushes.Red;
                     StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
-                }
-                else if (command == 'D')
-                {
-                    fillBrush = Brushes.DarkRed;
-                    StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
+                    symbol = Wpf.Ui.Controls.SymbolRegular.Prohibited24;
                 }
                 else if (command == 'W')
                 {
                     fillBrush = Brushes.Orange;
                     StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Warning;
+                    symbol = Wpf.Ui.Controls.SymbolRegular.Clock24;
+                }
+                else if (command == 'D') // Do Not Disturb
+                {
+                    fillBrush = Brushes.DarkRed;
+                    StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
+                    symbol = Wpf.Ui.Controls.SymbolRegular.DismissCircle24;
                 }
                 else
                 {
                     StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Informational;
+                    symbol = Wpf.Ui.Controls.SymbolRegular.Search24;
+                }
+
+                if (MainTitleBar != null)
+                {
+                    MainTitleBar.Icon = new Wpf.Ui.Controls.SymbolIcon
+                    {
+                        Symbol = symbol,
+                        Foreground = fillBrush
+                    };
                 }
                 
                 UpdateTrayIcon(fillBrush);

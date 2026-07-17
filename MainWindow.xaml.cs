@@ -27,6 +27,13 @@ namespace TeamsStatus
         {
             InitializeComponent();
             
+            try
+            {
+                // Lösche das Log-File beim Start, damit es nicht endlos wächst
+                System.IO.File.WriteAllText(GetLogFilePath(), string.Empty);
+            }
+            catch { }
+            
             // Check for update success
             string[] args = Environment.GetCommandLineArgs();
             if (args.Contains("-updated"))

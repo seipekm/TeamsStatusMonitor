@@ -473,7 +473,8 @@ namespace TeamsStatus
                             var logFiles = Directory.GetFiles(newTeamsLogDir, "MSTeams_*.log");
                             if (logFiles.Length > 0)
                             {
-                                filesToCheck.AddRange(logFiles.Select(f => new FileInfo(f)).OrderByDescending(f => f.LastWriteTime).Take(3));
+                                // Wir nehmen die 10 neuesten Dateien, falls Teams extrem viel loggt (z.B. in Meetings)
+                                filesToCheck.AddRange(logFiles.Select(f => new FileInfo(f)).OrderByDescending(f => f.LastWriteTime).Take(10));
                             }
                         }
 

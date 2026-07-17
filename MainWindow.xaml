@@ -21,6 +21,7 @@
                         <MenuItem x:Name="MenuStatusAway" Header="Abwesend" Click="MenuItem_StatusAway_Click" IsCheckable="True" />
                     </MenuItem>
                     <Separator />
+                    <MenuItem Header="Log-Datei öffnen" Click="MenuItem_OpenLog_Click" />
                     <MenuItem Header="Nach Updates suchen..." Click="MenuItem_Update_Click" />
                     <Separator />
                     <MenuItem Header="Beenden" Click="MenuItem_Exit_Click" />
@@ -79,7 +80,8 @@
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Content="Autostart installieren" Click="BtnInstallAutostart_Click" Margin="0,0,10,0" Padding="15,5"/>
-                <Button Content="Autostart deinstallieren" Click="BtnUninstallAutostart_Click" Padding="15,5"/>
+                <Button Content="Autostart deinstallieren" Click="BtnUninstallAutostart_Click" Margin="0,0,10,0" Padding="15,5"/>
+                <Button Content="Log öffnen" Click="MenuItem_OpenLog_Click" Padding="15,5"/>
             </StackPanel>
         </StackPanel>
     </Grid>

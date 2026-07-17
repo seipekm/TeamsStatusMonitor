@@ -637,6 +637,30 @@ namespace TeamsStatus
             Application.Current.Shutdown();
         }
 
+        private void MenuItem_OpenLog_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string logPath = GetLogFilePath();
+                if (System.IO.File.Exists(logPath))
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = logPath,
+                        UseShellExecute = true
+                    });
+                }
+                else
+                {
+                    MessageBox.Show("Die Log-Datei existiert noch nicht.", "Hinweis", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fehler beim Öffnen der Log-Datei: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void MenuItem_StatusAuto_Click(object sender, RoutedEventArgs e) => SetMode("Auto");
         private void MenuItem_StatusAvailable_Click(object sender, RoutedEventArgs e) => SetMode("A");
         private void MenuItem_StatusBusy_Click(object sender, RoutedEventArgs e) => SetMode("B");

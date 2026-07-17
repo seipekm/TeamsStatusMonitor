@@ -8,12 +8,12 @@
         ShowInTaskbar="False">
     <Grid Margin="20">
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock Text="Teams Status Monitor" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+            <ui:TextBlock Text="Teams Status Monitor" FontTypography="Title" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
             
-            <TextBlock x:Name="TxtVersion" Text="Version: 1.0.0" FontSize="14" HorizontalAlignment="Center" Margin="0,0,0,15" Foreground="#555"/>
+            <ui:TextBlock x:Name="TxtVersion" Text="Version: 1.0.0" FontTypography="Body" Appearance="Secondary" HorizontalAlignment="Center" Margin="0,0,0,15"/>
             
-            <TextBlock Text="Überträgt den Microsoft Teams Status" HorizontalAlignment="Center" Foreground="#333"/>
-            <TextBlock Text="an einen per USB angeschlossenen Arduino." HorizontalAlignment="Center" Margin="0,0,0,15" Foreground="#333"/>
+            <ui:TextBlock Text="Überträgt den Microsoft Teams Status" FontTypography="Body" Appearance="Secondary" HorizontalAlignment="Center"/>
+            <ui:TextBlock Text="an einen per USB angeschlossenen Arduino." FontTypography="Body" Appearance="Secondary" HorizontalAlignment="Center" Margin="0,0,0,15"/>
             
             <TextBlock HorizontalAlignment="Center" Margin="0,0,0,20">
                 <Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://github.com/seipekm/TeamsStatusMonitor">
@@ -21,7 +21,7 @@
                 </Hyperlink>
             </TextBlock>
             
-            <Button Content="Schließen" Width="100" Padding="5" Click="BtnClose_Click" HorizontalAlignment="Center"/>
+            <ui:Button Content="Schließen" Icon="{ui:SymbolIcon Dismiss24}" Width="110" Padding="5" Click="BtnClose_Click" HorizontalAlignment="Center" Appearance="Primary"/>
         </StackPanel>
     </Grid>
 </ui:FluentWindow>

@@ -47,17 +47,17 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                        <TextBlock Text="COM Port:" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <ui:TextBlock Text="COM Port:" FontTypography="BodyStrong" VerticalAlignment="Center"/>
                         <Ellipse x:Name="ConnIcon" Width="10" Height="10" Fill="Red" Margin="10,0,5,0" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="TxtConnStatus" Text="Getrennt" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
+                        <ui:TextBlock x:Name="TxtConnStatus" Text="Getrennt" VerticalAlignment="Center" FontSize="11" Appearance="Secondary"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <ComboBox x:Name="CmbPorts" Width="130" SelectionChanged="CmbPorts_SelectionChanged"/>
-                        <Button x:Name="BtnConnect" Content="Verbinden" Click="BtnConnect_Click" Margin="10,0,0,0" Width="70"/>
+                        <ui:Button x:Name="BtnConnect" Content="Verbinden" Icon="{ui:SymbolIcon Link24}" Click="BtnConnect_Click" Margin="10,0,0,0" Width="100"/>
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Grid.Column="2">
-                    <TextBlock Text="Baudrate:" Margin="0,0,0,5" FontWeight="SemiBold"/>
+                    <ui:TextBlock Text="Baudrate:" Margin="0,0,0,5" FontTypography="BodyStrong"/>
                     <ComboBox x:Name="CmbBaudRate" SelectionChanged="CmbBaudRate_SelectionChanged">
                         <ComboBoxItem Content="9600" IsSelected="True"/>
                         <ComboBoxItem Content="19200"/>
@@ -68,30 +68,30 @@
                 </StackPanel>
             </Grid>
 
-            <TextBlock Text="Helligkeit:" Margin="0,0,0,5" FontWeight="SemiBold"/>
+            <ui:TextBlock Text="Helligkeit:" Margin="0,0,0,5" FontTypography="BodyStrong"/>
             <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
                 <Slider x:Name="SldBrightness" Width="320" Minimum="0" Maximum="255" Value="128" ValueChanged="SldBrightness_ValueChanged" VerticalAlignment="Center"/>
-                <TextBlock x:Name="TxtBrightness" Text="128" Margin="10,0,0,0" VerticalAlignment="Center" Width="30"/>
+                <ui:TextBlock x:Name="TxtBrightness" Text="128" Margin="10,0,0,0" VerticalAlignment="Center" Width="30"/>
             </StackPanel>
 
-            <TextBlock Text="Modus:" Margin="0,0,0,5" FontWeight="SemiBold"/>
+            <ui:TextBlock Text="Modus:" Margin="0,0,0,5" FontTypography="BodyStrong"/>
             <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                <Button x:Name="BtnModeAuto" Content="Auto (Teams)" Click="BtnMode_Click" Tag="Auto" Padding="8,4" Margin="0,0,5,0" />
-                <Button x:Name="BtnModeAvailable" Content="Verfügbar" Click="BtnMode_Click" Tag="A" Padding="8,4" Margin="0,0,5,0" />
-                <Button x:Name="BtnModeBusy" Content="Beschäftigt" Click="BtnMode_Click" Tag="B" Padding="8,4" Margin="0,0,5,0" />
-                <Button x:Name="BtnModeAway" Content="Abwesend" Click="BtnMode_Click" Tag="W" Padding="8,4" Margin="0,0,5,0" />
+                <ui:Button x:Name="BtnModeAuto" Content="Auto (Teams)" Click="BtnMode_Click" Tag="Auto" Padding="8,4" Margin="0,0,5,0" />
+                <ui:Button x:Name="BtnModeAvailable" Content="Verfügbar" Click="BtnMode_Click" Tag="A" Padding="8,4" Margin="0,0,5,0" />
+                <ui:Button x:Name="BtnModeBusy" Content="Beschäftigt" Click="BtnMode_Click" Tag="B" Padding="8,4" Margin="0,0,5,0" />
+                <ui:Button x:Name="BtnModeAway" Content="Abwesend" Click="BtnMode_Click" Tag="W" Padding="8,4" Margin="0,0,5,0" />
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" Margin="0,0,0,20" VerticalAlignment="Center">
                 <Ellipse x:Name="StatusIcon" Width="16" Height="16" Fill="Gray" Margin="0,0,8,0" Stroke="DarkGray" StrokeThickness="1"/>
-                <TextBlock x:Name="TxtStatus" Text="Status: Unbekannt" FontWeight="Bold" VerticalAlignment="Center"/>
+                <ui:TextBlock x:Name="TxtStatus" Text="Status: Unbekannt" FontTypography="BodyStrong" VerticalAlignment="Center"/>
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Content="Autostart installieren" Click="BtnInstallAutostart_Click" Margin="0,0,10,0" Padding="15,5"/>
-                <Button Content="Autostart deinstallieren" Click="BtnUninstallAutostart_Click" Margin="0,0,10,0" Padding="15,5"/>
-                <Button Content="Log öffnen" Click="MenuItem_OpenLog_Click" Padding="15,5" Margin="0,0,10,0"/>
-                <Button Content="Info" Click="MenuItem_Info_Click" Padding="15,5"/>
+                <ui:Button Content="Autostart installieren" Icon="{ui:SymbolIcon Add24}" Click="BtnInstallAutostart_Click" Margin="0,0,10,0" Padding="15,5"/>
+                <ui:Button Content="Autostart deinstallieren" Icon="{ui:SymbolIcon Delete24}" Click="BtnUninstallAutostart_Click" Margin="0,0,10,0" Padding="15,5" Appearance="Danger"/>
+                <ui:Button Content="Log öffnen" Icon="{ui:SymbolIcon Document24}" Click="MenuItem_OpenLog_Click" Padding="15,5" Margin="0,0,10,0"/>
+                <ui:Button Content="Info" Icon="{ui:SymbolIcon Info24}" Click="MenuItem_Info_Click" Padding="15,5" Appearance="Primary"/>
             </StackPanel>
         </StackPanel>
     </Grid>

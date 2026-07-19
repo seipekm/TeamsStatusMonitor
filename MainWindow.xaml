@@ -37,15 +37,15 @@
                         <ui:TextBlock FontTypography="Subtitle" Text="Verbindung" Margin="0,0,0,10"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <ComboBox x:Name="CmbPorts" Width="250" Grid.Column="0" Margin="0,0,10,0" SelectionChanged="CmbPorts_SelectionChanged"/>
+                            <ComboBox x:Name="CmbPorts" Grid.Column="0" Margin="0,0,10,0" SelectionChanged="CmbPorts_SelectionChanged" HorizontalAlignment="Stretch"/>
                             <ui:Button Content="Aktualisieren" Grid.Column="1" Margin="0,0,10,0" Click="BtnRefreshPorts_Click"/>
-                            <ui:Button x:Name="BtnConnect" Content="Verbinden" Grid.Column="2" Click="BtnConnect_Click" Width="100"/>
-                            <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <ui:Button x:Name="BtnConnect" Content="Verbinden" Grid.Column="2" Margin="0,0,10,0" Click="BtnConnect_Click" Width="100"/>
+                            <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0,0,0">
                                 <Ellipse x:Name="ConnIcon" Width="10" Height="10" Fill="Red" Margin="0,0,5,0" />
                                 <TextBlock x:Name="TxtConnStatus" Text="Getrennt" />
                             </StackPanel>

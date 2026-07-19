@@ -121,20 +121,11 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
 
-                        <CheckBox x:Name="ChkDebugLog" Content="Debug aktivieren (mehr Output)" Grid.Row="0" Grid.ColumnSpan="4" Margin="0,0,0,5" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
-                        <CheckBox x:Name="ChkMonitorStatus" Content="Lokalen Teams-Status überwachen" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,10" Checked="ChkMonitorStatus_Changed" Unchecked="ChkMonitorStatus_Changed"/>
+                        <CheckBox x:Name="ChkDebugLog" Content="Debug aktivieren (mehr Output)" Grid.Row="0" Margin="0,0,0,5" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
+                        <CheckBox x:Name="ChkMonitorStatus" Content="Lokalen Teams-Status überwachen" Grid.Row="1" Margin="0,0,0,10" Checked="ChkMonitorStatus_Changed" Unchecked="ChkMonitorStatus_Changed"/>
                         
-                        <ui:Button Content="Starten" Grid.Row="2" Grid.Column="0" Margin="0,0,10,0" HorizontalAlignment="Stretch" Click="BtnStartMonitor_Click"/>
-                        <ui:Button Content="Testen" Grid.Row="2" Grid.Column="1" Margin="0,0,10,0" HorizontalAlignment="Stretch" Click="BtnTestStatus_Click"/>
-                        <ui:Button Content="Stoppen" Grid.Row="2" Grid.Column="2" Margin="0,0,10,0" HorizontalAlignment="Stretch" Click="BtnStopMonitor_Click"/>
-                        <ui:Button Content="Info" Grid.Row="2" Grid.Column="3" HorizontalAlignment="Stretch" Click="MenuItem_Info_Click"/>
+                        <ui:Button Content="App / Entwickler Info" Grid.Row="2" HorizontalAlignment="Stretch" Click="MenuItem_Info_Click"/>
                     </Grid>
                 </GroupBox>
 

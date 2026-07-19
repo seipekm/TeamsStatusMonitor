@@ -1198,21 +1198,6 @@ namespace TeamsStatus
             }
         }
 
-        private void BtnStartMonitor_Click(object sender, RoutedEventArgs e)
-        {
-            ChkMonitorStatus.IsChecked = true;
-        }
-
-        private void BtnStopMonitor_Click(object sender, RoutedEventArgs e)
-        {
-            ChkMonitorStatus.IsChecked = false;
-        }
-
-        private void BtnTestStatus_Click(object sender, RoutedEventArgs e)
-        {
-            Log("Test-Status gestartet.");
-            SendStatus("test");
-        }
 
         private void TxtManualCommand_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {

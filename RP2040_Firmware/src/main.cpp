@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 
-#define FIRMWARE_VERSION "1.2.7"
+#define FIRMWARE_VERSION "1.2.8"
 
 // Konfiguration der LED-Matrix
 #define LED_PIN    15   // Data Pin für die WS2812 LEDs
@@ -115,7 +115,6 @@ void loop() {
     if (millis() - lastReceiveTime > TIMEOUT_MS) {
         if (currentMode != MODE_TIMEOUT) {
             currentMode = MODE_TIMEOUT;
-            setAllLeds(138, 43, 226, 255); // Violett
         }
     }
 
@@ -177,5 +176,21 @@ void loop() {
             }
             strip.show();
         }
+    }
+    else if (currentMode == MODE_TIMEOUT) {
+        unsigned long now = millis();
+        // Langsames Pulsieren (Sinus-Welle) für den Disconnected-Status
+        // sin() gibt -1.0 bis 1.0 zurück.
+        float sinVal = (sin(now / 600.0) + 1.0) / 2.0; // 0.0 bis 1.0, sehr langsam
+        
+        // Helligkeit von 10 (nicht ganz aus) bis 200 (nicht ganz hell)
+        uint8_t breathBrightness = 10 + (uint8_t)(sinVal * 190);
+        
+        strip.setBrightness(breathBrightness);
+        for(int i = 0; i < NUM_LEDS; i++) {
+            // Zeige weiterhin das "Disconnected" Violett an
+            strip.setPixelColor(i, strip.Color(138, 43, 226)); 
+        }
+        strip.show();
     }
 }

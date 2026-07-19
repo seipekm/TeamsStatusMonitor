@@ -9,6 +9,7 @@
     <Version>1.2.14</Version>
     <AssemblyVersion>1.2.14.0</AssemblyVersion>
     <FileVersion>1.2.14.0</FileVersion>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

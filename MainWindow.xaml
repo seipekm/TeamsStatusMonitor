@@ -22,6 +22,9 @@
                 <ContextMenu>
                     <MenuItem Header="Öffnen" Click="MenuItem_Open_Click" />
                     <Separator />
+                    <MenuItem Header="Auf App-Update prüfen" Click="MenuItem_Update_Click" />
+                    <MenuItem Header="Auf Firmware-Update prüfen" Click="MenuItem_FirmwareUpdate_Click" />
+                    <Separator />
                     <MenuItem Header="Beenden" Click="MenuItem_Exit_Click" />
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>

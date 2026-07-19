@@ -1097,6 +1097,11 @@ namespace TeamsStatus
             _ = CheckAndPerformAppUpdate(true);
         }
 
+        private void MenuItem_FirmwareUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            _ = CheckAndPerformFirmwareUpdate();
+        }
+
         private void MenuItem_Info_Click(object sender, RoutedEventArgs e)
         {
             var infoWindow = new InfoWindow();

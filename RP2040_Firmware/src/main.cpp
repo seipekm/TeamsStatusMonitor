@@ -82,6 +82,9 @@ void loop() {
                 Serial.print("VERSION:");
                 Serial.println(FIRMWARE_VERSION);
             }
+            else if (input.startsWith("UPDATE")) {
+                rp2040.rebootToBootloader();
+            }
             else {
                 // 2. Daten im Format "R,G,B,Brightness" auswerten
                 int comma1 = input.indexOf(',');

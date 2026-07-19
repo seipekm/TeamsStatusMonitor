@@ -60,9 +60,11 @@ namespace TeamsStatus
             
             MainWindow mainWindow = new MainWindow();
             
-            if (!autostart)
+            bool startMinimized = mainWindow.ChkStartMinimized.IsChecked == true;
+            
+            if (!autostart && !startMinimized)
             {
-                // Nur anzeigen, wenn NICHT im Autostart
+                // Nur anzeigen, wenn NICHT im Autostart und NICHT "Minimiert starten" aktiviert ist
                 mainWindow.Show();
             }
             // Wenn autostart = true, bleibt das Fenster unsichtbar, 

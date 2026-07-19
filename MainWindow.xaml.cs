@@ -63,6 +63,11 @@ namespace TeamsStatus
             LoadSettings();
             _isLoaded = true;
             
+            if (ChkAutoConnect.IsChecked == true && CmbPorts.SelectedItem != null)
+            {
+                _ = ConnectSerial(); // Automatisch beim Start mit den geladenen Settings verbinden
+            }
+            
             // Start im zuletzt gespeicherten Modus
             if (_currentMode == "Auto" && !string.IsNullOrEmpty(_lastStatus) && _lastStatus != "U")
             {
@@ -1005,6 +1010,9 @@ namespace TeamsStatus
         {
             this.Show();
             this.WindowState = WindowState.Normal;
+            this.Activate();
+            this.Topmost = true;  // kurz in den Vordergrund zwingen
+            this.Topmost = false;
             _isLoaded = true;
         }
 
@@ -1024,17 +1032,6 @@ namespace TeamsStatus
             else
             {
                 _ = CheckAndPerformAppUpdate(false);
-            }
-
-            if (ChkStartMinimized.IsChecked == true || args.Contains("-autostart"))
-            {
-                this.WindowState = WindowState.Minimized;
-                this.Hide();
-            }
-
-            if (ChkAutoConnect.IsChecked == true && CmbPorts.SelectedItem != null)
-            {
-                await ConnectSerial();
             }
         }
 

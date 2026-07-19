@@ -24,6 +24,7 @@
                     <Separator />
                     <MenuItem Header="Auf App-Update prüfen" Click="MenuItem_Update_Click" />
                     <MenuItem Header="Auf Firmware-Update prüfen" Click="MenuItem_FirmwareUpdate_Click" />
+                    <MenuItem Header="App / Entwickler Info" Click="MenuItem_Info_Click" />
                     <Separator />
                     <MenuItem Header="Beenden" Click="MenuItem_Exit_Click" />
                 </ContextMenu>

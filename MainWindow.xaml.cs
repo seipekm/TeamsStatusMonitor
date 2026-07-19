@@ -101,14 +101,39 @@ namespace TeamsStatus
                                 string description = caption.Substring(0, startIndex).Trim();
                                 
                                 // Nur Raspberry Pi Pico (VID_2E8A) oder explizit Teams Status Monitor (PID_1234)
-                                if (pnpId.Contains("PID_1234")) 
+                                if (pnpId.Contains("PID_1234") || pnpId.Contains("VID_2E8A")) 
                                 {
-                                    description = "Teams Status Monitor";
-                                    ports.Add($"{portName} - {description}");
-                                }
-                                else if (pnpId.Contains("VID_2E8A"))
-                                {
-                                    description = "Raspberry Pi Pico";
+                                    description = pnpId.Contains("PID_1234") ? "Teams Status Monitor" : "Raspberry Pi Pico";
+                                    
+                                    // Versuche, die Seriennummer des USB-Root-Geräts zu ermitteln
+                                    string serial = "";
+                                    try 
+                                    {
+                                        int miIndex = pnpId.IndexOf("&MI_");
+                                        if (miIndex > 0)
+                                        {
+                                            string vidPid = pnpId.Substring(0, miIndex); // z.B. "USB\VID_2E8A&PID_1234"
+                                            string queryStr = $"SELECT PNPDeviceID FROM Win32_PnPEntity WHERE PNPDeviceID LIKE '{vidPid.Replace("\\", "\\\\")}\\\\%'";
+                                            using (var parentSearcher = new System.Management.ManagementObjectSearcher(queryStr))
+                                            {
+                                                foreach (System.Management.ManagementObject parentObj in parentSearcher.Get())
+                                                {
+                                                    string parentPnpId = parentObj["PNPDeviceID"]?.ToString() ?? "";
+                                                    if (!parentPnpId.Contains("&MI_"))
+                                                    {
+                                                        serial = parentPnpId.Substring(parentPnpId.LastIndexOf('\\') + 1);
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } catch {}
+
+                                    if (!string.IsNullOrEmpty(serial))
+                                    {
+                                        description += $" ({serial})";
+                                    }
+
                                     ports.Add($"{portName} - {description}");
                                 }
                             }

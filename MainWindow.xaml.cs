@@ -10,9 +10,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Text.Json;
 using System.Net.Http;
+using System.Collections.Generic;
 
 namespace TeamsStatus
 {
+    public class PortItem
+    {
+        public string PortName { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
+        public override string ToString() => DisplayName;
+    }
+
     public partial class MainWindow : Wpf.Ui.Controls.FluentWindow
     {
         private SerialPort? _serialPort;
@@ -80,7 +88,7 @@ namespace TeamsStatus
 
         private void LoadPorts()
         {
-            var ports = new System.Collections.Generic.List<string>();
+            List<PortItem> ports = new List<PortItem>();
             string[] rawPorts = System.IO.Ports.SerialPort.GetPortNames();
 
             try
@@ -134,7 +142,7 @@ namespace TeamsStatus
                                         description = serial;
                                     }
 
-                                    ports.Add($"{portName} - {description}");
+                                    ports.Add(new PortItem { PortName = portName, DisplayName = description });
                                 }
                             }
                         }
@@ -152,7 +160,7 @@ namespace TeamsStatus
             {
                 foreach (var rp in rawPorts)
                 {
-                    ports.Add(rp);
+                    ports.Add(new PortItem { PortName = rp, DisplayName = rp });
                 }
             }
 
@@ -203,7 +211,7 @@ namespace TeamsStatus
             {
                 var settings = new
                 {
-                    PortName = (CmbPorts.SelectedItem?.ToString() ?? "").Split(' ')[0],
+                    PortName = (CmbPorts.SelectedItem as PortItem)?.PortName ?? "",
                     BaudRate = "9600",
                     Brightness = SldBrightness.Value,
                     CurrentMode = _currentMode,
@@ -237,9 +245,9 @@ namespace TeamsStatus
                         string savedPort = pn.GetString() ?? "";
                         if (!string.IsNullOrEmpty(savedPort))
                         {
-                            foreach (string item in CmbPorts.Items)
+                            foreach (PortItem item in CmbPorts.Items)
                             {
-                                if (item.StartsWith(savedPort + " ") || item == savedPort)
+                                if (item.PortName == savedPort)
                                 {
                                     CmbPorts.SelectedItem = item;
                                     break;
@@ -291,9 +299,8 @@ namespace TeamsStatus
 
         private async Task ConnectSerial()
         {
-            if (CmbPorts.SelectedItem == null) return;
-            string portSelection = CmbPorts.SelectedItem.ToString() ?? string.Empty;
-            string port = portSelection.Split(' ')[0];
+            if (CmbPorts.SelectedItem is not PortItem selectedItem) return;
+            string port = selectedItem.PortName;
             
             int baudRate = 9600; // Fixed baud rate
 

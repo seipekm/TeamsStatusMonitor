@@ -216,7 +216,10 @@ namespace TeamsStatus
                     Brightness = SldBrightness.Value,
                     CurrentMode = _currentMode,
                     LastStatus = _lastStatus,
-                    LastStatusText = _lastUiStatusText
+                    LastStatusText = _lastUiStatusText,
+                    AutoConnect = ChkAutoConnect.IsChecked ?? false,
+                    StartMinimized = ChkStartMinimized.IsChecked ?? false,
+                    SendFreeOnConnect = ChkSendFree.IsChecked ?? false
                 };
                 string json = JsonSerializer.Serialize(settings);
                 System.IO.File.WriteAllText(GetSettingsFilePath(), json);
@@ -267,7 +270,21 @@ namespace TeamsStatus
                     {
                         _lastUiStatusText = lst.GetString() ?? "";
                     }
+                    if (root.TryGetProperty("AutoConnect", out var ac))
+                    {
+                        ChkAutoConnect.IsChecked = ac.GetBoolean();
+                    }
+                    if (root.TryGetProperty("StartMinimized", out var sm))
+                    {
+                        ChkStartMinimized.IsChecked = sm.GetBoolean();
+                    }
+                    if (root.TryGetProperty("SendFreeOnConnect", out var sf))
+                    {
+                        ChkSendFree.IsChecked = sf.GetBoolean();
+                    }
                 }
+                
+                ChkStartWindows.IsChecked = System.IO.File.Exists(GetShortcutPath());
             }
             catch { }
         }
@@ -319,7 +336,14 @@ namespace TeamsStatus
                 CurrentFirmwareVersion = "Unbekannt";
                 _serialPort.WriteLine("VERSION");
                 
-                SendStatus(_lastStatus); // Zuletzt bekannten Status senden
+                if (ChkSendFree.IsChecked == true)
+                {
+                    UpdateStatus("Manuell: Verfügbar", 'A');
+                }
+                else
+                {
+                    SendStatus(_lastStatus); // Zuletzt bekannten Status senden
+                }
             }
             catch (Exception ex)
             {
@@ -1001,6 +1025,17 @@ namespace TeamsStatus
             else
             {
                 _ = CheckAndPerformAppUpdate(false);
+            }
+
+            if (ChkStartMinimized.IsChecked == true || args.Contains("-autostart"))
+            {
+                this.WindowState = WindowState.Minimized;
+                this.Hide();
+            }
+
+            if (ChkAutoConnect.IsChecked == true && CmbPorts.SelectedItem != null)
+            {
+                await ConnectSerial();
             }
         }
 

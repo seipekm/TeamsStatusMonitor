@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 
+#define FIRMWARE_VERSION "1.0.0"
+
 // Konfiguration der LED-Matrix
 #define LED_PIN    15   // Data Pin für die WS2812 LEDs
 #define NUM_LEDS   16   // Anzahl der LEDs (16 bit Matrix = 16 LEDs)
@@ -71,6 +73,10 @@ void loop() {
                 currentMode = MODE_RAINBOW;
                 if (firstComma > 0) globalBrightness = constrain(input.substring(firstComma + 1).toInt(), 0, 255);
             } 
+            else if (input.startsWith("VERSION")) {
+                Serial.print("VERSION:");
+                Serial.println(FIRMWARE_VERSION);
+            }
             else {
                 // 2. Daten im Format "R,G,B,Brightness" auswerten
                 int comma1 = input.indexOf(',');

@@ -46,6 +46,8 @@
                         <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                             <Ellipse x:Name="ConnIcon" Width="10" Height="10" Fill="Red" Margin="0,0,5,0" />
                             <TextBlock x:Name="TxtConnStatus" Text="Getrennt" />
+                            <TextBlock x:Name="TxtFirmwareVersion" Text="" Foreground="Gray" Margin="5,0,0,0"/>
+                            <ui:Button x:Name="BtnUpdateFirmware" Content="Firmware Update" Margin="10,0,0,0" Click="BtnUpdateFirmware_Click" Height="24" Padding="5,0" Visibility="Collapsed"/>
                         </StackPanel>
                     </Grid>
                 </GroupBox>

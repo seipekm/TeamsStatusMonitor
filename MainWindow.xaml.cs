@@ -264,7 +264,8 @@ namespace TeamsStatus
                 _serialPort.Open();
                 SetConnectionStatus(true);
                 
-                // Firmware Version abfragen
+                // Firmware Version abfragen (Default: Unbekannt)
+                CurrentFirmwareVersion = "Unbekannt";
                 _serialPort.WriteLine("VERSION");
                 
                 SendStatus(_lastStatus); // Zuletzt bekannten Status senden
@@ -285,10 +286,6 @@ namespace TeamsStatus
                 _serialPort = null;
             }
             SetConnectionStatus(false);
-            Dispatcher.Invoke(() => {
-                if (TxtFirmwareVersion != null) TxtFirmwareVersion.Text = "";
-                if (BtnUpdateFirmware != null) BtnUpdateFirmware.Visibility = Visibility.Collapsed;
-            });
         }
 
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
@@ -301,20 +298,16 @@ namespace TeamsStatus
                     if (data.StartsWith("VERSION:"))
                     {
                         string version = data.Substring(8);
-                        Dispatcher.Invoke(() => {
-                            if (TxtFirmwareVersion != null) TxtFirmwareVersion.Text = $"(FW: {version})";
-                            if (BtnUpdateFirmware != null) BtnUpdateFirmware.Visibility = Visibility.Visible;
-                            _currentFirmwareVersion = version;
-                        });
+                        CurrentFirmwareVersion = version;
                     }
                 }
             }
             catch { }
         }
 
-        private string _currentFirmwareVersion = "";
+        public string CurrentFirmwareVersion { get; set; } = "Unbekannt";
 
-        private async void BtnUpdateFirmware_Click(object sender, RoutedEventArgs e)
+        public async Task CheckAndPerformFirmwareUpdate()
         {
             try
             {
@@ -335,11 +328,11 @@ namespace TeamsStatus
                 string tag = root.GetProperty("tag_name").GetString() ?? "";
                 string latestVersion = tag.TrimStart('v');
 
-                if (Version.TryParse(latestVersion, out Version? latestV) && Version.TryParse(_currentFirmwareVersion, out Version? currentV) && latestV != null && currentV != null)
+                if (Version.TryParse(latestVersion, out Version? latestV) && Version.TryParse(CurrentFirmwareVersion, out Version? currentV) && latestV != null && currentV != null)
                 {
                     if (latestV > currentV)
                     {
-                        var result = await ShowFluentMessageBoxAsync("Firmware Update", $"Neue Firmware {latestVersion} verfügbar (Aktuell: {_currentFirmwareVersion}).\nJetzt flashen?", true);
+                        var result = await ShowFluentMessageBoxAsync("Firmware Update", $"Neue Firmware {latestVersion} verfügbar (Aktuell: {CurrentFirmwareVersion}).\nJetzt flashen?", true);
                         if (result == Wpf.Ui.Controls.MessageBoxResult.Primary)
                         {
                             string downloadUrl = "";
@@ -367,12 +360,37 @@ namespace TeamsStatus
                     }
                     else
                     {
-                        await ShowFluentMessageBoxAsync("Info", $"Die Firmware ist bereits auf dem neuesten Stand ({_currentFirmwareVersion}).");
+                        await ShowFluentMessageBoxAsync("Info", $"Die Firmware ist bereits auf dem neuesten Stand ({CurrentFirmwareVersion}).");
                     }
                 }
                 else
                 {
-                    await ShowFluentMessageBoxAsync("Info", $"Konnte Versionsnummern nicht vergleichen (Lokal: {_currentFirmwareVersion}, GitHub: {latestVersion}).");
+                    // Fallback wenn aktuelle Version "Unbekannt" ist, trotzdem Update zulassen
+                    var result = await ShowFluentMessageBoxAsync("Firmware Update", $"Neue Firmware {latestVersion} verfügbar. (Aktuell: {CurrentFirmwareVersion})\nMöchtest du das Update erzwingen?", true);
+                    if (result == Wpf.Ui.Controls.MessageBoxResult.Primary)
+                    {
+                        string downloadUrl = "";
+                        if (root.TryGetProperty("assets", out JsonElement assets))
+                        {
+                            foreach (var asset in assets.EnumerateArray())
+                            {
+                                if (asset.GetProperty("name").GetString() == "firmware.uf2")
+                                {
+                                    downloadUrl = asset.GetProperty("browser_download_url").GetString() ?? "";
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (!string.IsNullOrEmpty(downloadUrl))
+                        {
+                            await PerformFirmwareUpdate(downloadUrl);
+                        }
+                        else
+                        {
+                            await ShowFluentMessageBoxAsync("Fehler", "Die Datei firmware.uf2 wurde im neuesten Release nicht gefunden.");
+                        }
+                    }
                 }
             }
             catch (Exception ex)

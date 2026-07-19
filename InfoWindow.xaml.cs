@@ -19,6 +19,14 @@ namespace TeamsStatus
             }
         }
 
+        private async void BtnUpdateFirmware_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.Owner is MainWindow mw)
+            {
+                await mw.CheckAndPerformFirmwareUpdate();
+            }
+        }
+
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
             try
@@ -45,6 +53,11 @@ namespace TeamsStatus
             this.MaxWidth = this.ActualWidth;
             this.MinHeight = this.ActualHeight;
             this.MaxHeight = this.ActualHeight;
+
+            if (this.Owner is MainWindow mw)
+            {
+                TxtFirmwareVersion.Text = $"Firmware: {mw.CurrentFirmwareVersion}";
+            }
         }
 
         private void TitleBar_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

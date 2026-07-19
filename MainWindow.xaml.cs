@@ -941,7 +941,7 @@ namespace TeamsStatus
             }
             else
             {
-                CheckAndPerformAppUpdate(false);
+                _ = CheckAndPerformAppUpdate(false);
             }
         }
 

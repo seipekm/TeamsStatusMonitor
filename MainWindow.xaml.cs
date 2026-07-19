@@ -692,10 +692,10 @@ namespace TeamsStatus
                     string dataUpper = data.ToUpper();
 
                     if (dataUpper == "VERSION") command = "VERSION\n";
-                    else if (dataUpper == "A") command = $"50,205,50,{brightness}\n";
-                    else if (dataUpper == "B") command = $"220,20,60,{brightness}\n";
-                    else if (dataUpper == "D") command = $"139,0,0,{brightness}\n";
-                    else if (dataUpper == "W") command = $"218,165,32,{brightness}\n";
+                    else if (dataUpper == "A") command = $"0,255,0,{brightness}\n"; // Reines Grün
+                    else if (dataUpper == "B") command = $"255,0,0,{brightness}\n"; // Reines Rot
+                    else if (dataUpper == "D") command = $"128,0,0,{brightness}\n"; // Dunkelrot für "Nicht stören"
+                    else if (dataUpper == "W") command = $"255,255,0,{brightness}\n"; // Reines Gelb
                     else if (System.Linq.Enumerable.Count(data, c => c == ',') == 2) command = $"{data},{brightness}\n";
                     else command = $"{data},{brightness}\n";
 

@@ -687,16 +687,18 @@ namespace TeamsStatus
                     });
 
                     string command = "";
-                    if (data == "A") command = $"50,205,50,{brightness}\n";
-                    else if (data == "B") command = $"220,20,60,{brightness}\n";
-                    else if (data == "D") command = $"139,0,0,{brightness}\n";
-                    else if (data == "W") command = $"218,165,32,{brightness}\n";
+                    string dataUpper = data.ToUpper();
+
+                    if (dataUpper == "VERSION") command = "VERSION\n";
+                    else if (dataUpper == "A") command = $"50,205,50,{brightness}\n";
+                    else if (dataUpper == "B") command = $"220,20,60,{brightness}\n";
+                    else if (dataUpper == "D") command = $"139,0,0,{brightness}\n";
+                    else if (dataUpper == "W") command = $"218,165,32,{brightness}\n";
                     else if (System.Linq.Enumerable.Count(data, c => c == ',') == 2) command = $"{data},{brightness}\n";
                     else command = $"{data},{brightness}\n";
 
                     _serialPort.Write(command);
-                    Log(data);
-                    Log("OK");
+                    Log($"Gesendet: {data}");
                     if (!_isConnected) SetConnectionStatus(true);
                 }
                 catch (Exception ex)

@@ -482,8 +482,11 @@ namespace TeamsStatus
         {
             try
             {
-                string portSelection = CmbPorts.SelectedItem?.ToString() ?? string.Empty;
-                string port = portSelection.Split(' ')[0];
+                string port = "";
+                if (CmbPorts.SelectedItem is PortItem pi)
+                {
+                    port = pi.PortName;
+                }
 
                 DisconnectSerial();
                 await Task.Delay(500);

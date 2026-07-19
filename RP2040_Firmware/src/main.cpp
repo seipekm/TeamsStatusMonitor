@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 
-#define FIRMWARE_VERSION "1.2.10"
+#define FIRMWARE_VERSION "1.2.11"
 
 // Konfiguration der LED-Matrix
 #define LED_PIN    15   // Data Pin für die WS2812 LEDs
@@ -19,7 +19,8 @@ enum Mode {
     MODE_BLAULICHT,
     MODE_RAINBOW,
     MODE_FIRE,
-    MODE_TIMEOUT
+    MODE_TIMEOUT,
+    MODE_RINGING
 };
 Mode currentMode = MODE_SOLID;
 
@@ -76,6 +77,10 @@ void loop() {
             } 
             else if (input.startsWith("Fire")) {
                 currentMode = MODE_FIRE;
+                if (firstComma > 0) globalBrightness = constrain(input.substring(firstComma + 1).toInt(), 0, 255);
+            } 
+            else if (input.startsWith("Ringing")) {
+                currentMode = MODE_RINGING;
                 if (firstComma > 0) globalBrightness = constrain(input.substring(firstComma + 1).toInt(), 0, 255);
             } 
             else if (input.startsWith("VERSION")) {
@@ -190,6 +195,18 @@ void loop() {
         for(int i = 0; i < NUM_LEDS; i++) {
             // Zeige weiterhin das "Disconnected" Violett an
             strip.setPixelColor(i, strip.Color(138, 43, 226)); 
+        }
+        strip.show();
+    }
+    else if (currentMode == MODE_RINGING) {
+        unsigned long now = millis();
+        int cycle = now % 600; // 600ms cycle for fast blinking
+        strip.setBrightness(globalBrightness);
+        
+        if (cycle < 300) {
+            for (int i = 0; i < NUM_LEDS; i++) strip.setPixelColor(i, strip.Color(255, 0, 0)); // Red ON
+        } else {
+            strip.clear(); // Red OFF
         }
         strip.show();
     }

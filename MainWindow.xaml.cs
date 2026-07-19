@@ -30,6 +30,8 @@ namespace TeamsStatus
         private bool _isLoaded = false;
         private bool _isConnected = false;
         private string _currentMode = "Auto";
+        private string _teamsWebSocketToken = "";
+        private TeamsWebSocketService? _webSocketService;
 
         public MainWindow()
         {
@@ -60,7 +62,50 @@ namespace TeamsStatus
             _sendTimer.Start();
 
             LoadPorts();
+            
+            // Load saved settings
             LoadSettings();
+
+            // Setup WebSocket
+            _webSocketService = new TeamsWebSocketService(_teamsWebSocketToken);
+            _webSocketService.OnLog += Log;
+            _webSocketService.OnTokenReceived += (token) => {
+                _teamsWebSocketToken = token;
+                Dispatcher.Invoke(() => SaveSettings());
+            };
+            _webSocketService.OnMeetingStateChanged += (isInMeeting, isMuted) => {
+                Dispatcher.Invoke(() => {
+                    if (_currentMode != "Auto") return;
+                    
+                    if (isInMeeting)
+                    {
+                        UpdateStatus("Auto: In a call", 'B'); // 'B' = Busy / Red
+                    }
+                    else
+                    {
+                        // Fallback to latest polled status from log
+                        UpdateStatus("Auto: Meeting beendet, warte auf Präsenz...", 'O'); // Offline/Free temporarily until log parser picks up
+                    }
+                });
+            };
+            _webSocketService.OnCallStateChanged += (isRinging) => {
+                Dispatcher.Invoke(() => {
+                    if (_currentMode != "Auto") return;
+                    
+                    if (isRinging)
+                    {
+                        UpdateStatus("Auto: Eingehender Anruf (Klingelt)", 'R'); // 'R' = Ringing mode
+                        if (_isConnected && _serialPort != null)
+                        {
+                            try {
+                                _serialPort.WriteLine($"Ringing,{(int)SldBrightness.Value}");
+                            } catch {}
+                        }
+                    }
+                });
+            };
+            _webSocketService.Start();
+            
             _isLoaded = true;
             
             if (ChkAutoConnect.IsChecked == true && CmbPorts.SelectedItem != null)
@@ -223,7 +268,8 @@ namespace TeamsStatus
                     LastStatusText = _lastUiStatusText,
                     AutoConnect = ChkAutoConnect.IsChecked ?? false,
                     StartMinimized = ChkStartMinimized.IsChecked ?? false,
-                    SendFreeOnConnect = ChkSendFree.IsChecked ?? false
+                    SendFreeOnConnect = ChkSendFree.IsChecked ?? false,
+                    TeamsWebSocketToken = _teamsWebSocketToken
                 };
                 string json = JsonSerializer.Serialize(settings);
                 System.IO.File.WriteAllText(GetSettingsFilePath(), json);
@@ -282,9 +328,14 @@ namespace TeamsStatus
                     {
                         ChkStartMinimized.IsChecked = sm.GetBoolean();
                     }
-                    if (root.TryGetProperty("SendFreeOnConnect", out var sf))
+                    if (root.TryGetProperty("SendFreeOnConnect", out var sendFree))
                     {
-                        ChkSendFree.IsChecked = sf.GetBoolean();
+                        ChkSendFree.IsChecked = sendFree.GetBoolean();
+                    }
+                    
+                    if (root.TryGetProperty("TeamsWebSocketToken", out var tokenProp))
+                    {
+                        _teamsWebSocketToken = tokenProp.GetString() ?? "";
                     }
                 }
                 
@@ -589,6 +640,7 @@ namespace TeamsStatus
                 else if (_lastStatus == "W") brush = Brushes.Orange;
                 else if (_lastStatus == "B") brush = Brushes.Red;
                 else if (_lastStatus == "D") brush = Brushes.DarkRed;
+                else if (_lastStatus == "R") brush = Brushes.DeepPink;
                 UpdateTrayIcon(brush);
             });
         }
@@ -667,6 +719,11 @@ namespace TeamsStatus
                 {
                     fillBrush = Brushes.White;
                     symbol = Wpf.Ui.Controls.SymbolRegular.PlugDisconnected24;
+                }
+                else if (command == 'R') // Ringing
+                {
+                    fillBrush = Brushes.DeepPink;
+                    symbol = Wpf.Ui.Controls.SymbolRegular.Call24;
                 }
                 else
                 {
@@ -776,11 +833,12 @@ namespace TeamsStatus
                     else if (dataUpper == "D") command = $"128,0,0,{brightness}\n"; // Dunkelrot für "Nicht stören"
                     else if (dataUpper == "W") command = $"255,255,0,{brightness}\n"; // Reines Gelb
                     else if (dataUpper == "O") command = $"255,255,255,{brightness}\n"; // Weiß für "Offline" / Teams aus
+                    else if (dataUpper == "R") command = $"Ringing,{brightness}\n"; // Klingeln
                     else if (System.Linq.Enumerable.Count(data, c => c == ',') == 2) command = $"{data},{brightness}\n";
                     else command = $"{data},{brightness}\n";
 
                     _serialPort.Write(command);
-                    Log($"Gesendet: {data}");
+                    Log($"Gesendet: {command.TrimEnd('\n')}");
                     if (!_isConnected) SetConnectionStatus(true);
                 }
                 catch (Exception ex)
@@ -889,6 +947,21 @@ namespace TeamsStatus
                                     }
                                 }
 
+                                // Check Calls
+                                int lastIncomingCallIdx = -1;
+                                var incomingMatches = System.Text.RegularExpressions.Regex.Matches(content, @"reportIncomingCall");
+                                foreach (System.Text.RegularExpressions.Match m in incomingMatches) if (m.Index > lastIncomingCallIdx) lastIncomingCallIdx = m.Index;
+
+                                int lastCallEndedIdx = -1;
+                                var endedMatches = System.Text.RegularExpressions.Regex.Matches(content, @"reportCallEnded");
+                                foreach (System.Text.RegularExpressions.Match m in endedMatches) if (m.Index > lastCallEndedIdx) lastCallEndedIdx = m.Index;
+
+                                if (lastIncomingCallIdx > lastCallEndedIdx && lastIncomingCallIdx > maxIndex)
+                                {
+                                    parsedStatus = "Ringing";
+                                    maxIndex = lastIncomingCallIdx;
+                                }
+
                                 if (maxIndex > -1)
                                 {
                                     if (parsedStatus.Equals("Available", StringComparison.OrdinalIgnoreCase))
@@ -899,6 +972,8 @@ namespace TeamsStatus
                                         UpdateStatus("Auto: Beschäftigt", 'B');
                                     else if (parsedStatus == "Away" || parsedStatus == "BeRightBack" || parsedStatus == "brb")
                                         UpdateStatus("Auto: Abwesend", 'W');
+                                    else if (parsedStatus == "Ringing")
+                                        UpdateStatus("Auto: Eingehender Anruf (Klingelt)", 'R');
                                     
                                     foundStatus = true;
                                     break;
@@ -1064,6 +1139,14 @@ namespace TeamsStatus
         private void MenuItem_Exit_Click(object sender, RoutedEventArgs e)
         {
             StopMonitoring();
+            if (MyNotifyIcon != null)
+            {
+                MyNotifyIcon.Dispose();
+            }
+            if (_webSocketService != null)
+            {
+                _webSocketService.Stop();
+            }
             Application.Current.Shutdown();
         }
 

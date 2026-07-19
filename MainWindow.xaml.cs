@@ -441,64 +441,18 @@ namespace TeamsStatus
         {
             try
             {
-                // 1. Download UF2
-                string tempFile = Path.Combine(Path.GetTempPath(), "firmware.uf2");
-                using (var client = new HttpClient())
-                {
-                    var response = await client.GetAsync(downloadUrl);
-                    response.EnsureSuccessStatusCode();
-                    using var fs = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None);
-                    await response.Content.CopyToAsync(fs);
-                }
-
-                // 2. Trigger Bootloader (1200 Baud)
-                if (CmbPorts.SelectedItem == null) return;
-                string portSelection = CmbPorts.SelectedItem.ToString() ?? string.Empty;
+                string portSelection = CmbPorts.SelectedItem?.ToString() ?? string.Empty;
                 string port = portSelection.Split(' ')[0];
 
                 DisconnectSerial();
                 await Task.Delay(500);
 
-                try
+                var fwWindow = new FirmwareUpdateWindow(downloadUrl, port)
                 {
-                    using (var resetPort = new SerialPort(port, 1200))
-                    {
-                        resetPort.Open();
-                        await Task.Delay(100);
-                        resetPort.Close();
-                    }
-                }
-                catch { } // Kann fehlschlagen, wenn das Gerät sofort verschwindet
+                    Owner = this
+                };
+                fwWindow.ShowDialog();
 
-                // 3. Warten auf RPI-RP2 Laufwerk
-                string targetDrive = "";
-                for (int i = 0; i < 20; i++) // 10 Sekunden warten
-                {
-                    await Task.Delay(500);
-                    var drives = DriveInfo.GetDrives();
-                    foreach (var d in drives)
-                    {
-                        if (d.IsReady && d.VolumeLabel == "RPI-RP2")
-                        {
-                            targetDrive = d.Name;
-                            break;
-                        }
-                    }
-                    if (!string.IsNullOrEmpty(targetDrive)) break;
-                }
-
-                if (string.IsNullOrEmpty(targetDrive))
-                {
-                    await ShowFluentMessageBoxAsync("Fehler", "RP2040 Bootloader-Laufwerk (RPI-RP2) wurde nicht gefunden. Bitte manuell abstecken und mit gedrückter BOOT-Taste anstecken.");
-                    return;
-                }
-
-                // 4. Kopieren
-                string destFile = Path.Combine(targetDrive, "firmware.uf2");
-                File.Copy(tempFile, destFile, true);
-                
-                await ShowFluentMessageBoxAsync("Erfolg", "Firmware wurde erfolgreich übertragen. Das Gerät startet nun neu.");
-                
                 // Wieder verbinden
                 await Task.Delay(2000);
                 LoadPorts();

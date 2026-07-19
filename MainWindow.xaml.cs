@@ -497,10 +497,25 @@ namespace TeamsStatus
                 };
                 fwWindow.ShowDialog();
 
-                // Wieder verbinden
-                await Task.Delay(2000);
-                LoadPorts();
-                await ConnectSerial();
+                // Wieder verbinden (Pico braucht etwas Zeit zum Neustarten)
+                bool reconnected = false;
+                for (int i = 0; i < 15; i++)
+                {
+                    await Task.Delay(1000);
+                    LoadPorts();
+                    
+                    foreach (PortItem item in CmbPorts.Items)
+                    {
+                        if (item.PortName == port)
+                        {
+                            CmbPorts.SelectedItem = item;
+                            await ConnectSerial();
+                            reconnected = true;
+                            break;
+                        }
+                    }
+                    if (reconnected) break;
+                }
             }
             catch (Exception ex)
             {

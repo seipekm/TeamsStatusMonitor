@@ -143,6 +143,14 @@ namespace TeamsStatus
             {
                 string logPath = GetLogFilePath();
                 System.IO.File.AppendAllText(logPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}{Environment.NewLine}");
+                
+                Dispatcher.InvokeAsync(() => {
+                    if (TxtLogOutput != null)
+                    {
+                        TxtLogOutput.AppendText($"{DateTime.Now:HH:mm:ss} - {message}\n");
+                        TxtLogOutput.ScrollToEnd();
+                    }
+                });
             }
             catch { }
         }

@@ -8,10 +8,11 @@ using Wpf.Ui.Controls;
 
 namespace TeamsStatus
 {
-    public partial class FirmwareUpdateWindow : FluentWindow
+    public partial class FirmwareUpdateWindow : Wpf.Ui.Controls.FluentWindow
     {
-        private readonly string _downloadUrl;
-        private readonly string _comPort;
+        private string _downloadUrl;
+        private string _comPort;
+        public bool UpdateFailed { get; private set; } = false;
 
         public FirmwareUpdateWindow(string downloadUrl, string comPort)
         {
@@ -127,6 +128,7 @@ namespace TeamsStatus
 
                 if (string.IsNullOrEmpty(targetDrive))
                 {
+                    UpdateFailed = true;
                     var uiMessageBox = new Wpf.Ui.Controls.MessageBox
                     {
                         Title = "Fehler",

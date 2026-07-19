@@ -26,6 +26,8 @@
             <ui:TextBlock Text="Überträgt den Microsoft Teams Status" FontTypography="Body" Appearance="Secondary" HorizontalAlignment="Center"/>
             <ui:TextBlock Text="an einen per USB angeschlossenen Arduino." FontTypography="Body" Appearance="Secondary" HorizontalAlignment="Center" Margin="0,0,0,15"/>
             
+            <ui:Button x:Name="BtnBootloader" Content="Manueller Firmware Update-Modus (Bootloader)" Click="BtnBootloader_Click" Appearance="Danger" HorizontalAlignment="Center" Margin="0,0,0,15" Visibility="Collapsed"/>
+            
             <TextBlock HorizontalAlignment="Center" Margin="0,0,0,20">
                 <Hyperlink RequestNavigate="Hyperlink_RequestNavigate" NavigateUri="https://github.com/seipekm/TeamsStatusMonitor">
                     GitHub Repository besuchen

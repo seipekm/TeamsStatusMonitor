@@ -358,6 +358,7 @@ namespace TeamsStatus
         }
 
         public string CurrentFirmwareVersion { get; set; } = "Unbekannt";
+        public bool FirmwareUpdateFailed { get; set; } = false;
 
         public async Task CheckAndPerformFirmwareUpdate()
         {
@@ -496,6 +497,11 @@ namespace TeamsStatus
                     Owner = this
                 };
                 fwWindow.ShowDialog();
+
+                if (fwWindow.UpdateFailed)
+                {
+                    FirmwareUpdateFailed = true;
+                }
 
                 // Wieder verbinden (Pico braucht etwas Zeit zum Neustarten)
                 bool reconnected = false;
@@ -720,7 +726,7 @@ namespace TeamsStatus
             SaveSettings();
         }
 
-        private void SendStatus(string data)
+        public void SendStatus(string data)
         {
             if (string.IsNullOrEmpty(data)) return;
             if (_serialPort != null && _serialPort.IsOpen)
@@ -1272,14 +1278,6 @@ namespace TeamsStatus
             {
                 SendStatus(TxtManualCommand.Text);
                 TxtManualCommand.Clear();
-            }
-        }
-
-        private void BtnBootloader_Click(object sender, RoutedEventArgs e)
-        {
-            if (MessageBox.Show("Möchtest du den Pico wirklich in den Update-Modus (Bootloader) versetzen? Er wird als USB-Laufwerk neu gestartet.", "Bootloader starten", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-            {
-                SendStatus("UPDATE");
             }
         }
     }

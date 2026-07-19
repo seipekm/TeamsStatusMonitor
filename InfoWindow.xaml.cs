@@ -24,6 +24,21 @@ namespace TeamsStatus
             if (this.Owner is MainWindow mw)
             {
                 await mw.CheckAndPerformFirmwareUpdate();
+                if (mw.FirmwareUpdateFailed)
+                {
+                    BtnBootloader.Visibility = Visibility.Visible;
+                }
+            }
+        }
+
+        private void BtnBootloader_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.Owner is MainWindow mw)
+            {
+                if (MessageBox.Show("Möchtest du den Pico wirklich in den Update-Modus (Bootloader) versetzen? Er wird als USB-Laufwerk neu gestartet.", "Bootloader starten", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                {
+                    mw.SendStatus("UPDATE");
+                }
             }
         }
 

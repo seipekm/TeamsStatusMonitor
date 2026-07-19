@@ -1008,6 +1008,7 @@ namespace TeamsStatus
 
         private void MenuItem_Open_Click(object sender, RoutedEventArgs e)
         {
+            this.ShowInTaskbar = true;
             this.Show();
             this.WindowState = WindowState.Normal;
             this.Activate();

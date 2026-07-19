@@ -62,10 +62,20 @@ namespace TeamsStatus
             
             bool startMinimized = mainWindow.ChkStartMinimized.IsChecked == true;
             
-            if (!autostart && !startMinimized)
+            if (autostart || startMinimized)
             {
-                // Nur anzeigen, wenn NICHT im Autostart und NICHT "Minimiert starten" aktiviert ist
-                mainWindow.Show();
+                // Wenn minimiert gestartet wird, WindowState setzen BEVOR das Fenster angezeigt wird.
+                // Dadurch wird der WPF/Mica Rendering Bug vermieden und das Tray-Icon trotzdem erstellt.
+                mainWindow.WindowState = WindowState.Minimized;
+                mainWindow.ShowInTaskbar = false;
+                mainWindow.Hide(); // WPF versteckt es komplett aus Taskleiste
+            }
+            
+            mainWindow.Show();
+            
+            if (autostart || startMinimized)
+            {
+                mainWindow.Hide(); // Nochmal aufrufen, um sicherzustellen, dass es versteckt ist
             }
             // Wenn autostart = true, bleibt das Fenster unsichtbar, 
             // aber die App läuft dank ShutdownMode im Hintergrund weiter.

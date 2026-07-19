@@ -6,15 +6,18 @@ Ein Zwei-Komponenten-Projekt, bestehend aus einer **C# WPF Desktop-App** und ein
 
 ## Features
 
+- **Modernes Design:** Überarbeitete Benutzeroberfläche mit **Wpf.Ui** (Mica/Acrylic Effekte, Dark Mode, Fluent Design).
 - **Automatischer Teams-Sync:** Liest den Status direkt aus den lokalen Teams-Logdateien – keine Admin-Rechte oder Graph API erforderlich!
 - **Manuelle Steuerung:** Den Status bei Bedarf per Klick übersteuern (Verfügbar, Beschäftigt, Abwesend).
+- **LED-Animationen:** Eigene Effekte integriert wie **"Blaulicht"** (Blinkeffekt) und **"Rainbow"** (weicher Farbwechsel).
 - **Helligkeits-Slider:** Stufenlose Regelung der LED-Leuchtkraft direkt aus der Windows-App heraus.
+- **Smarte Hardware-Erkennung:** Die C#-App erkennt durch eine fest in der Firmware verankerte, eindeutige USB-ID (`PID 0x1234`) den RP2040 automatisch als "Teams Status Monitor" in der COM-Port-Liste.
 - **Fail-Safe Timeout:** Der RP2040 Controller schaltet die LED-Matrix automatisch auf "Violett" (Offline / Not at desk), wenn die App geschlossen wird, der PC in den Standby geht oder keine Daten mehr empfangen werden.
 - **System-Tray Integration:** Die App läuft unsichtbar im Hintergrund und blendet sich in der Taskleiste neben der Uhr ein (mit farbigem Status-Indikator).
 
 ## Projektstruktur
 
-1. **`./` (Root)** - C# .NET 10 WPF Desktop-Applikation.  
+1. **`./` (Root)** - C# .NET 9 WPF Desktop-Applikation.  
 2. **`RP2040_Firmware/`** - C++ Firmware-Projekt für PlatformIO.
 
 ## Installation & Setup
@@ -32,14 +35,15 @@ Ein Zwei-Komponenten-Projekt, bestehend aus einer **C# WPF Desktop-App** und ein
 ### 3. Desktop-App starten
 1. Öffne die `TeamsStatus.csproj` in **Visual Studio** oder baue die App mit dem Befehl `dotnet build`.
 2. Starte die Anwendung.
-3. Wähle den entsprechenden **COM-Port** deines angesteckten RP2040-Zero in der App.
+3. Wähle den entsprechenden **COM-Port** deines angesteckten RP2040-Zero in der App. Dank der smarten Hardware-Erkennung sollte er eindeutig als "Teams Status Monitor" benannt sein.
 4. Klicke bei Bedarf auf **"Autostart installieren"**, damit die App beim nächsten PC-Start direkt im Hintergrund hochfährt.
 
 ## Datenprotokoll (Serial)
 
 Die Desktop-App sendet alle 2 Sekunden folgenden String über die gewählte COM-Schnittstelle an den Controller:
 
-`R,G,B,Helligkeit\n`
+`R,G,B,Helligkeit\n`  
+*(Zusätzlich können Spezialkommandos wie `BLAULICHT\n` oder `RAINBOW\n` übertragen werden).*
 
 Beispiel: `50,205,50,255\n` (Grün bei maximaler Helligkeit).
 Wird 6 Sekunden lang nichts empfangen, wechselt der RP2040 als Timeout-Schutz auf Violett.

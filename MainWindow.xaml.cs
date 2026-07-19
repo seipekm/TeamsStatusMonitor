@@ -570,6 +570,11 @@ namespace TeamsStatus
                     fillBrush = Brushes.DarkRed;
                     symbol = Wpf.Ui.Controls.SymbolRegular.DismissCircle24;
                 }
+                else if (command == 'O') // Offline / Teams closed
+                {
+                    fillBrush = Brushes.White;
+                    symbol = Wpf.Ui.Controls.SymbolRegular.PlugDisconnected24;
+                }
                 else
                 {
                     symbol = Wpf.Ui.Controls.SymbolRegular.Search24;
@@ -677,6 +682,7 @@ namespace TeamsStatus
                     else if (dataUpper == "B") command = $"255,0,0,{brightness}\n"; // Reines Rot
                     else if (dataUpper == "D") command = $"128,0,0,{brightness}\n"; // Dunkelrot für "Nicht stören"
                     else if (dataUpper == "W") command = $"255,255,0,{brightness}\n"; // Reines Gelb
+                    else if (dataUpper == "O") command = $"255,255,255,{brightness}\n"; // Weiß für "Offline" / Teams aus
                     else if (System.Linq.Enumerable.Count(data, c => c == ',') == 2) command = $"{data},{brightness}\n";
                     else command = $"{data},{brightness}\n";
 
@@ -726,6 +732,13 @@ namespace TeamsStatus
                 {
                     try
                     {
+                        bool isTeamsRunning = System.Diagnostics.Process.GetProcessesByName("ms-teams").Length > 0 || System.Diagnostics.Process.GetProcessesByName("Teams").Length > 0;
+                        if (!isTeamsRunning)
+                        {
+                            UpdateStatus("Auto: Teams geschlossen", 'O');
+                            continue;
+                        }
+
                         // Sammle die relevanten Log-Dateien
                         var filesToCheck = new System.Collections.Generic.List<FileInfo>();
                         

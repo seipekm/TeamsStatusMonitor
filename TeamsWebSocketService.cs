@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace TeamsStatus
 {
@@ -47,10 +48,25 @@ namespace TeamsStatus
 
         private async Task ConnectLoopAsync(CancellationToken token)
         {
+            bool wasTeamsRunning = true; // um Log-Spam beim Statuswechsel zu vermeiden
+
             while (!token.IsCancellationRequested)
             {
                 try
                 {
+                    bool isTeamsRunning = Process.GetProcessesByName("ms-teams").Length > 0;
+                    if (!isTeamsRunning)
+                    {
+                        if (wasTeamsRunning)
+                        {
+                            OnLog?.Invoke("WebSocket: Teams läuft nicht, warte auf Start...");
+                            wasTeamsRunning = false;
+                        }
+                        await Task.Delay(5000, token);
+                        continue;
+                    }
+                    wasTeamsRunning = true;
+
                     _ws = new ClientWebSocket();
                     string url = $"ws://127.0.0.1:8124?protocol-version=2.0.0&manufacturer=TeamsStatusMonitor&device=Monitor&app=TeamsStatusMonitor&app-version=1.0.0";
                     if (!string.IsNullOrEmpty(_token))

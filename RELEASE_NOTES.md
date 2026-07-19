@@ -1,3 +1,11 @@
+## Version 1.2.14 (App)
+*Veröffentlicht: 19. Juli 2026*
+
+### Bugfixes ??
+* **Log-Spam behoben:** Die WebSocket API-Abfrage prüft nun vorher, ob Microsoft Teams überhaupt gestartet ist. Falls nicht, wird im Hintergrund stillschweigend gewartet, anstatt minütlich eine Fehlermeldung ins App-Log zu schreiben.
+
+---
+
 # Release Notes
 
 ## Version 1.2.13 (App) & 1.2.11 (Firmware)
@@ -18,3 +26,4 @@
 
 ### Wichtiger Hinweis fÃ¼r dieses Update âš ï¸
 Da diese Version eine komplett neue LED-Animation (das rote Anruf-Blinken) einfÃ¼hrt, **muss die Hardware-Firmware zwingend auf Version 1.2.11 aktualisiert werden**, damit das Feature funktioniert. Nutze dafÃ¼r einfach die Firmware-Update Funktion innerhalb der App! Ebenso wirst du beim ersten Start der App nach dem Update von Teams einmalig um die Erlaubnis gebeten, dass die Drittanbieter-Schnittstelle zugreifen darf ("Zulassen").
+

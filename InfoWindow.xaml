@@ -19,7 +19,10 @@
             <ui:TextBlock x:Name="TxtVersion" Text="Version: 1.0.0" FontTypography="Body" Appearance="Secondary" HorizontalAlignment="Center" Margin="0,0,0,5"/>
             <ui:TextBlock x:Name="TxtFirmwareVersion" Text="Firmware: Unbekannt" FontTypography="Body" Appearance="Secondary" HorizontalAlignment="Center" Margin="0,0,0,15"/>
             
-            <ui:Button x:Name="BtnUpdateFirmware" Content="Nach Firmware-Updates suchen" Click="BtnUpdateFirmware_Click" HorizontalAlignment="Center" Margin="0,0,0,15"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,15">
+                <ui:Button x:Name="BtnUpdateApp" Content="Nach App-Updates suchen" Click="BtnUpdateApp_Click" Margin="0,0,10,0"/>
+                <ui:Button x:Name="BtnUpdateFirmware" Content="Nach Firmware-Updates suchen" Click="BtnUpdateFirmware_Click"/>
+            </StackPanel>
             <ui:TextBlock Text="Überträgt den Microsoft Teams Status" FontTypography="Body" Appearance="Secondary" HorizontalAlignment="Center"/>
             <ui:TextBlock Text="an einen per USB angeschlossenen Arduino." FontTypography="Body" Appearance="Secondary" HorizontalAlignment="Center" Margin="0,0,0,15"/>
             

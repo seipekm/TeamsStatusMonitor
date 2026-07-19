@@ -941,7 +941,7 @@ namespace TeamsStatus
             }
             else
             {
-                CheckForUpdates(false);
+                CheckAndPerformAppUpdate(false);
             }
         }
 
@@ -1008,7 +1008,7 @@ namespace TeamsStatus
 
         private void MenuItem_Update_Click(object sender, RoutedEventArgs e)
         {
-            CheckForUpdates(true);
+            _ = CheckAndPerformAppUpdate(true);
         }
 
         private void MenuItem_Info_Click(object sender, RoutedEventArgs e)
@@ -1018,7 +1018,7 @@ namespace TeamsStatus
             infoWindow.ShowDialog();
         }
 
-        private async void CheckForUpdates(bool showMessageIfUpToDate)
+        public async Task CheckAndPerformAppUpdate(bool showMessageIfUpToDate = false)
         {
             try
             {

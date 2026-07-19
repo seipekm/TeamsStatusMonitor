@@ -27,6 +27,14 @@ namespace TeamsStatus
             }
         }
 
+        private async void BtnUpdateApp_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.Owner is MainWindow mw)
+            {
+                await mw.CheckAndPerformAppUpdate(true);
+            }
+        }
+
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
             try

@@ -407,24 +407,24 @@ namespace TeamsStatus
                 using JsonDocument doc = JsonDocument.Parse(json);
                 
                 JsonElement? latestFwRelease = null;
-                JsonElement? fallbackRelease = null;
+                Version? maxFwVersion = null;
                 
                 foreach (var release in doc.RootElement.EnumerateArray())
                 {
                     string tagName = release.GetProperty("tag_name").GetString() ?? "";
-                    if (tagName.StartsWith("fw-v") && latestFwRelease == null)
+                    if (tagName.StartsWith("fw-v") || (tagName.StartsWith("v") && !tagName.StartsWith("app-v")))
                     {
-                        latestFwRelease = release;
+                        string versionStr = tagName.StartsWith("fw-v") ? tagName.Substring(4) : tagName.TrimStart('v');
+                        if (Version.TryParse(versionStr, out Version? v))
+                        {
+                            if (maxFwVersion == null || v > maxFwVersion)
+                            {
+                                maxFwVersion = v;
+                                latestFwRelease = release;
+                            }
+                        }
                     }
-                    else if (tagName.StartsWith("v") && !tagName.StartsWith("app-v") && fallbackRelease == null)
-                    {
-                        fallbackRelease = release;
-                    }
-                    
-                    if (latestFwRelease != null) break;
                 }
-
-                latestFwRelease ??= fallbackRelease;
 
                 if (latestFwRelease == null)
                 {
@@ -1129,24 +1129,24 @@ namespace TeamsStatus
                 using JsonDocument doc = JsonDocument.Parse(json);
                 
                 JsonElement? latestAppRelease = null;
-                JsonElement? fallbackRelease = null;
+                Version? maxAppVersion = null;
                 
                 foreach (var release in doc.RootElement.EnumerateArray())
                 {
                     string tagName = release.GetProperty("tag_name").GetString() ?? "";
-                    if (tagName.StartsWith("app-v") && latestAppRelease == null)
+                    if (tagName.StartsWith("app-v") || (tagName.StartsWith("v") && !tagName.StartsWith("fw-v")))
                     {
-                        latestAppRelease = release;
+                        string versionStr = tagName.StartsWith("app-v") ? tagName.Substring(5) : tagName.TrimStart('v');
+                        if (Version.TryParse(versionStr, out Version? v))
+                        {
+                            if (maxAppVersion == null || v > maxAppVersion)
+                            {
+                                maxAppVersion = v;
+                                latestAppRelease = release;
+                            }
+                        }
                     }
-                    else if (tagName.StartsWith("v") && !tagName.StartsWith("fw-v") && fallbackRelease == null)
-                    {
-                        fallbackRelease = release;
-                    }
-                    
-                    if (latestAppRelease != null) break;
                 }
-
-                latestAppRelease ??= fallbackRelease;
 
                 if (latestAppRelease == null)
                 {

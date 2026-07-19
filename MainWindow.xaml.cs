@@ -60,8 +60,8 @@ namespace TeamsStatus
             if (_currentMode == "Auto" && !string.IsNullOrEmpty(_lastStatus) && _lastStatus != "U")
             {
                 // Wenn Auto-Modus und wir einen alten Status haben, starte Monitoring, aber überschreibe nicht mit "Suche Log..."
-                BtnModeAuto.Appearance = Wpf.Ui.Controls.ControlAppearance.Primary;
-                MenuStatusAuto.IsChecked = true;
+                HighlightActiveButton("Auto");
+                ChkMonitorStatus.IsChecked = true;
                 StartMonitoring();
                 
                 string savedText = _lastUiStatusText;
@@ -80,9 +80,49 @@ namespace TeamsStatus
 
         private void LoadPorts()
         {
-            CmbPorts.ItemsSource = SerialPort.GetPortNames();
-            if (CmbPorts.Items.Count > 0)
-                CmbPorts.SelectedIndex = 0;
+            var ports = new System.Collections.Generic.List<string>();
+            string[] rawPorts = System.IO.Ports.SerialPort.GetPortNames();
+
+            try
+            {
+                using (var searcher = new System.Management.ManagementObjectSearcher("SELECT Caption, PNPDeviceID FROM Win32_PnPEntity WHERE Caption LIKE '%(COM%'"))
+                {
+                    foreach (System.Management.ManagementObject queryObj in searcher.Get())
+                    {
+                        string caption = queryObj["Caption"]?.ToString() ?? "";
+                        string pnpId = queryObj["PNPDeviceID"]?.ToString() ?? "";
+                        int startIndex = caption.LastIndexOf("(COM");
+                        if (startIndex >= 0)
+                        {
+                            int endIndex = caption.IndexOf(")", startIndex);
+                            if (endIndex >= 0)
+                            {
+                                string portName = caption.Substring(startIndex + 1, endIndex - startIndex - 1);
+                                string description = caption.Substring(0, startIndex).Trim();
+                                if (pnpId.Contains("PID_1234")) 
+                                {
+                                    description = "Teams Status Monitor";
+                                }
+                                ports.Add($"{portName} - {description}");
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Fallback falls WMI fehlschlägt
+            }
+
+            foreach (var rp in rawPorts)
+            {
+                if (!System.Linq.Enumerable.Any(ports, p => p.StartsWith(rp + " ")))
+                {
+                    ports.Add(rp);
+                }
+            }
+
+            CmbPorts.ItemsSource = ports;
         }
 
         private string GetLogFilePath()
@@ -121,8 +161,8 @@ namespace TeamsStatus
             {
                 var settings = new
                 {
-                    PortName = CmbPorts.SelectedItem?.ToString() ?? "",
-                    BaudRate = (CmbBaudRate.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "9600",
+                    PortName = (CmbPorts.SelectedItem?.ToString() ?? "").Split(' ')[0],
+                    BaudRate = "9600",
                     Brightness = SldBrightness.Value,
                     CurrentMode = _currentMode,
                     LastStatus = _lastStatus,
@@ -149,24 +189,20 @@ namespace TeamsStatus
                     {
                         SldBrightness.Value = b.GetDouble();
                     }
-                    if (root.TryGetProperty("BaudRate", out var br))
-                    {
-                        string savedBaud = br.GetString() ?? "9600";
-                        foreach (ComboBoxItem item in CmbBaudRate.Items)
-                        {
-                            if (item.Content.ToString() == savedBaud)
-                            {
-                                CmbBaudRate.SelectedItem = item;
-                                break;
-                            }
-                        }
-                    }
+                    // BaudRate dropdown was removed
                     if (root.TryGetProperty("PortName", out var pn))
                     {
                         string savedPort = pn.GetString() ?? "";
-                        if (!string.IsNullOrEmpty(savedPort) && CmbPorts.Items.Contains(savedPort))
+                        if (!string.IsNullOrEmpty(savedPort))
                         {
-                            CmbPorts.SelectedItem = savedPort;
+                            foreach (string item in CmbPorts.Items)
+                            {
+                                if (item.StartsWith(savedPort + " ") || item == savedPort)
+                                {
+                                    CmbPorts.SelectedItem = item;
+                                    break;
+                                }
+                            }
                         }
                     }
                     if (root.TryGetProperty("CurrentMode", out var cm))
@@ -214,13 +250,10 @@ namespace TeamsStatus
         private async Task ConnectSerial()
         {
             if (CmbPorts.SelectedItem == null) return;
-            string port = CmbPorts.SelectedItem.ToString() ?? string.Empty;
+            string portSelection = CmbPorts.SelectedItem.ToString() ?? string.Empty;
+            string port = portSelection.Split(' ')[0];
             
-            int baudRate = 9600;
-            if (CmbBaudRate != null && CmbBaudRate.SelectedItem is ComboBoxItem selectedItem)
-            {
-                int.TryParse(selectedItem.Content.ToString(), out baudRate);
-            }
+            int baudRate = 9600; // Fixed baud rate
 
             DisconnectSerial();
 
@@ -275,14 +308,13 @@ namespace TeamsStatus
                 }
                 
                 // Force tray icon update
-                if (StatusInfoBar != null)
-                {
-                    Brush brush = Brushes.Gray;
-                    if (StatusInfoBar.Severity == Wpf.Ui.Controls.InfoBarSeverity.Success) brush = Brushes.LimeGreen;
-                    else if (StatusInfoBar.Severity == Wpf.Ui.Controls.InfoBarSeverity.Warning) brush = Brushes.Orange;
-                    else if (StatusInfoBar.Severity == Wpf.Ui.Controls.InfoBarSeverity.Error) brush = _lastStatus == "B" ? Brushes.Red : Brushes.DarkRed; // "B" is Busy/Red, "D" is DND/DarkRed
-                    UpdateTrayIcon(brush);
-                }
+                // Tray Icon update
+                Brush brush = Brushes.Gray;
+                if (_lastStatus == "A") brush = Brushes.LimeGreen;
+                else if (_lastStatus == "W") brush = Brushes.Orange;
+                else if (_lastStatus == "B") brush = Brushes.Red;
+                else if (_lastStatus == "D") brush = Brushes.DarkRed;
+                UpdateTrayIcon(brush);
             });
         }
 
@@ -298,40 +330,10 @@ namespace TeamsStatus
             _currentMode = tag;
             SaveSettings();
 
-            // Reset all buttons and menus
-            BtnModeAuto.Appearance = Wpf.Ui.Controls.ControlAppearance.Secondary;
-            BtnModeAvailable.Appearance = Wpf.Ui.Controls.ControlAppearance.Secondary;
-            BtnModeBusy.Appearance = Wpf.Ui.Controls.ControlAppearance.Secondary;
-            BtnModeAway.Appearance = Wpf.Ui.Controls.ControlAppearance.Secondary;
-
-            MenuStatusAuto.IsChecked = false;
-            MenuStatusAvailable.IsChecked = false;
-            MenuStatusBusy.IsChecked = false;
-            MenuStatusAway.IsChecked = false;
-
             if (tag == "Auto") 
             {
-                BtnModeAuto.Appearance = Wpf.Ui.Controls.ControlAppearance.Primary;
-                MenuStatusAuto.IsChecked = true;
-            }
-            else if (tag == "A") 
-            {
-                BtnModeAvailable.Appearance = Wpf.Ui.Controls.ControlAppearance.Primary;
-                MenuStatusAvailable.IsChecked = true;
-            }
-            else if (tag == "B") 
-            {
-                BtnModeBusy.Appearance = Wpf.Ui.Controls.ControlAppearance.Primary;
-                MenuStatusBusy.IsChecked = true;
-            }
-            else if (tag == "W") 
-            {
-                BtnModeAway.Appearance = Wpf.Ui.Controls.ControlAppearance.Primary;
-                MenuStatusAway.IsChecked = true;
-            }
-
-            if (tag == "Auto")
-            {
+                HighlightActiveButton("Auto");
+                ChkMonitorStatus.IsChecked = true;
                 StartMonitoring();
                 UpdateStatus("Suche Log...", 'U'); // U für Unknown/Suche
             }
@@ -360,7 +362,7 @@ namespace TeamsStatus
             // Dispatcher wird benötigt, falls das Event aus einem Hintergrund-Task (Auto) kommt
             Dispatcher.Invoke(() => 
             {
-                StatusInfoBar.Message = statusText;
+                // Kein InfoBar mehr, aber Tray-Icon kann separat aktualisiert werden falls gewünscht
                 
                 // Icon Farbe aktualisieren
                 Brush fillBrush = Brushes.Gray;
@@ -369,30 +371,25 @@ namespace TeamsStatus
                 if (command == 'A')
                 {
                     fillBrush = Brushes.LimeGreen;
-                    StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Success;
                     symbol = Wpf.Ui.Controls.SymbolRegular.CheckmarkCircle24;
                 }
                 else if (command == 'B')
                 {
                     fillBrush = Brushes.Red;
-                    StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
                     symbol = Wpf.Ui.Controls.SymbolRegular.Prohibited24;
                 }
                 else if (command == 'W')
                 {
                     fillBrush = Brushes.Orange;
-                    StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Warning;
                     symbol = Wpf.Ui.Controls.SymbolRegular.Clock24;
                 }
                 else if (command == 'D') // Do Not Disturb
                 {
                     fillBrush = Brushes.DarkRed;
-                    StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
                     symbol = Wpf.Ui.Controls.SymbolRegular.DismissCircle24;
                 }
                 else
                 {
-                    StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Informational;
                     symbol = Wpf.Ui.Controls.SymbolRegular.Search24;
                 }
 
@@ -484,28 +481,28 @@ namespace TeamsStatus
             {
                 try
                 {
-                    // RGB-Werte anhand des Status ermitteln
-                    int r = 128, g = 128, b = 128; // Standard: Grau
-                    if (data == "A") { r = 50; g = 205; b = 50; } // LimeGreen (Verfügbar)
-                    else if (data == "B") { r = 255; g = 0; b = 0; } // Red (Beschäftigt)
-                    else if (data == "D") { r = 139; g = 0; b = 0; } // DarkRed (Nicht stören)
-                    else if (data == "W") { r = 255; g = 165; b = 0; } // Orange (Abwesend/Gleich zurück)
-
-                    // Lese aktuelle Helligkeit sicher aus der UI aus
                     int brightness = 128;
                     Dispatcher.Invoke(() => {
                         if (SldBrightness != null)
                             brightness = (int)SldBrightness.Value;
                     });
 
-                    // Sende Format: R,G,B,Helligkeit (z.B. "50,205,50,255\n")
-                    string command = $"{r},{g},{b},{brightness}\n";
+                    string command = "";
+                    if (data == "A") command = $"50,205,50,{brightness}\n";
+                    else if (data == "B") command = $"220,20,60,{brightness}\n";
+                    else if (data == "D") command = $"139,0,0,{brightness}\n";
+                    else if (data == "W") command = $"218,165,32,{brightness}\n";
+                    else if (System.Linq.Enumerable.Count(data, c => c == ',') == 2) command = $"{data},{brightness}\n";
+                    else command = $"{data},{brightness}\n";
+
                     _serialPort.Write(command);
-                    
+                    Log(data);
+                    Log("OK");
                     if (!_isConnected) SetConnectionStatus(true);
                 }
-                catch 
+                catch (Exception ex)
                 {
+                    Log($"Fehler: {ex.Message}");
                     if (_isConnected) SetConnectionStatus(false);
                 }
             }
@@ -561,11 +558,7 @@ namespace TeamsStatus
                         if (filesToCheck.Count == 0)
                         {
                             Log("Es konnte keine New Teams Logdatei gefunden werden.");
-                            Dispatcher.Invoke(() => 
-                            {
-                                StatusInfoBar.Message = "New Teams Log nicht gefunden";
-                                StatusInfoBar.Severity = Wpf.Ui.Controls.InfoBarSeverity.Error;
-                            });
+                                Log("New Teams Log nicht gefunden");
                             continue;
                         }
 
@@ -898,6 +891,119 @@ namespace TeamsStatus
         private void MyNotifyIcon_TrayMouseDoubleClick(object sender, RoutedEventArgs e)
         {
             MenuItem_Open_Click(sender, e);
+        }
+        
+        private void BtnRefreshPorts_Click(object sender, RoutedEventArgs e)
+        {
+            LoadPorts();
+        }
+
+        private void HighlightActiveButton(string tag)
+        {
+            if (GridEffects != null)
+            {
+                foreach (var child in GridEffects.Children)
+                {
+                    if (child is Wpf.Ui.Controls.Button b)
+                    {
+                        if (b.Tag?.ToString() == tag)
+                        {
+                            b.BorderThickness = new Thickness(3);
+                            b.BorderBrush = Brushes.White;
+                        }
+                        else
+                        {
+                            b.BorderThickness = new Thickness(0);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void BtnEffect_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Wpf.Ui.Controls.Button btn && btn.Tag != null)
+            {
+                string tag = btn.Tag.ToString() ?? "";
+                HighlightActiveButton(tag);
+                if (tag == "Auto")
+                {
+                    ChkMonitorStatus.IsChecked = true;
+                }
+                else
+                {
+                    ChkMonitorStatus.IsChecked = false;
+                    _lastStatus = tag; // Set last status so cyclical timer keeps sending it
+                    _lastUiStatusText = "Manuell";
+                    SendStatus(tag);
+                }
+            }
+        }
+
+        private void Setting_Changed(object sender, RoutedEventArgs e)
+        {
+            SaveSettings();
+        }
+
+        private void ChkStartWindows_Changed(object sender, RoutedEventArgs e)
+        {
+            SaveSettings();
+            if (ChkStartWindows.IsChecked == true)
+            {
+                BtnInstallAutostart_Click(null, null);
+            }
+            else
+            {
+                BtnUninstallAutostart_Click(null, null);
+            }
+        }
+
+        private void ChkMonitorStatus_Changed(object sender, RoutedEventArgs e)
+        {
+            SaveSettings();
+            if (ChkMonitorStatus.IsChecked == true)
+            {
+                StartMonitoring();
+                UpdateStatus("Suche Log...", 'U');
+                HighlightActiveButton("Auto");
+            }
+            else
+            {
+                StopMonitoring();
+            }
+        }
+
+        private void BtnStartMonitor_Click(object sender, RoutedEventArgs e)
+        {
+            ChkMonitorStatus.IsChecked = true;
+        }
+
+        private void BtnStopMonitor_Click(object sender, RoutedEventArgs e)
+        {
+            ChkMonitorStatus.IsChecked = false;
+        }
+
+        private void BtnTestStatus_Click(object sender, RoutedEventArgs e)
+        {
+            Log("Test-Status gestartet.");
+            SendStatus("test");
+        }
+
+        private void TxtManualCommand_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                BtnManualCommand_Click(sender, e);
+            }
+        }
+
+        private void BtnManualCommand_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(TxtManualCommand.Text))
+            {
+                SendStatus(TxtManualCommand.Text);
+                TxtManualCommand.Clear();
+            }
         }
     }
 }

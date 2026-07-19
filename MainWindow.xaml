@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-        Title="Teams Status Monitor" SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+        Title="Teams Status Monitor" Width="600" Height="800"
         WindowBackdropType="Mica" ExtendsContentIntoTitleBar="True" WindowCornerPreference="Round"
         Closing="Window_Closing">
     
@@ -12,7 +12,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <!-- System Tray Icon -->
+
         <tb:TaskbarIcon x:Name="MyNotifyIcon"
                         ToolTipText="Teams Status Monitor"
                         IconSource="pack://application:,,,/icon.ico"
@@ -20,76 +20,141 @@
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Öffnen" Click="MenuItem_Open_Click" />
-                    <MenuItem Header="Status manuell setzen">
-                        <MenuItem x:Name="MenuStatusAuto" Header="Auto (Teams)" Click="MenuItem_StatusAuto_Click" IsCheckable="True" IsChecked="True" />
-                        <MenuItem x:Name="MenuStatusAvailable" Header="Verfügbar" Click="MenuItem_StatusAvailable_Click" IsCheckable="True" />
-                        <MenuItem x:Name="MenuStatusBusy" Header="Beschäftigt" Click="MenuItem_StatusBusy_Click" IsCheckable="True" />
-                        <MenuItem x:Name="MenuStatusAway" Header="Abwesend" Click="MenuItem_StatusAway_Click" IsCheckable="True" />
-                    </MenuItem>
-                    <Separator />
-                    <MenuItem Header="Log-Datei öffnen" Click="MenuItem_OpenLog_Click" />
-                    <MenuItem Header="Nach Updates suchen..." Click="MenuItem_Update_Click" />
-                    <MenuItem Header="Über Teams Status Monitor" Click="MenuItem_Info_Click" />
                     <Separator />
                     <MenuItem Header="Beenden" Click="MenuItem_Exit_Click" />
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
 
-        <ui:TitleBar x:Name="MainTitleBar" Title="Teams Status Monitor" Grid.Row="0" Margin="0" ShowMaximize="False" PreviewMouseLeftButtonDown="TitleBar_PreviewMouseLeftButtonDown" />
+        <ui:TitleBar x:Name="MainTitleBar" Title="Teams Status Monitor v1.1.3" Grid.Row="0" Margin="0" ShowMaximize="False" PreviewMouseLeftButtonDown="TitleBar_PreviewMouseLeftButtonDown" />
 
-        <StackPanel Grid.Row="1" Margin="15">
-            <Grid Margin="0,0,0,15">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="10" />
-                    <ColumnDefinition Width="100" />
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0">
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
-                        <ui:TextBlock Text="COM Port:" FontTypography="BodyStrong" VerticalAlignment="Center"/>
-                        <Ellipse x:Name="ConnIcon" Width="10" Height="10" Fill="Red" Margin="10,0,5,0" VerticalAlignment="Center"/>
-                        <ui:TextBlock x:Name="TxtConnStatus" Text="Getrennt" VerticalAlignment="Center" FontSize="11" Appearance="Secondary"/>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="10">
+                
+                <!-- Verbindung -->
+                <GroupBox Header="Verbindung" Margin="0,0,0,10">
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ComboBox x:Name="CmbPorts" Width="150" Grid.Column="0" Margin="0,0,10,0" SelectionChanged="CmbPorts_SelectionChanged"/>
+                        <ui:Button Content="Aktualisieren" Grid.Column="1" Margin="0,0,10,0" Click="BtnRefreshPorts_Click"/>
+                        <ui:Button x:Name="BtnConnect" Content="Verbinden" Grid.Column="2" Click="BtnConnect_Click" Width="100"/>
+                        <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Ellipse x:Name="ConnIcon" Width="10" Height="10" Fill="Red" Margin="0,0,5,0" />
+                            <TextBlock x:Name="TxtConnStatus" Text="Getrennt" />
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Status / Effekte -->
+                <GroupBox Header="Status / Effekte" Margin="0,0,0,10">
+                    <Grid x:Name="GridEffects" Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Row 0 -->
+                        <ui:Button Content="Aus" Background="#444444" Click="BtnEffect_Click" Tag="0,0,0" Grid.Row="0" Grid.Column="0" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
+                        <ui:Button Content="Frei" Background="#32CD32" Click="BtnEffect_Click" Tag="50,205,50" Grid.Row="0" Grid.Column="1" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
+                        <ui:Button Content="Besetzt" Background="#DC143C" Click="BtnEffect_Click" Tag="220,20,60" Grid.Row="0" Grid.Column="2" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
+                        <ui:Button Content="Anruf" Background="#FF4500" Click="BtnEffect_Click" Tag="255,69,0" Grid.Row="0" Grid.Column="3" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
+                        <ui:Button Content="Abwesend" Background="#DAA520" Click="BtnEffect_Click" Tag="218,165,32" Grid.Row="0" Grid.Column="4" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
+                        <ui:Button Content="Blaulicht" Background="#1E90FF" Click="BtnEffect_Click" Tag="Blaulicht" Grid.Row="0" Grid.Column="5" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
+
+                        <!-- Row 1 -->
+                        <ui:Button Content="Rainbow" Background="#8A2BE2" Click="BtnEffect_Click" Tag="Rainbow" Grid.Row="1" Grid.Column="0" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
+                        <ui:Button Content="Scan" Background="#4682B4" Click="BtnEffect_Click" Tag="70,130,180" Grid.Row="1" Grid.Column="1" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
+                        <ui:Button Content="Fire" Background="#D2691E" Click="BtnEffect_Click" Tag="210,105,30" Grid.Row="1" Grid.Column="2" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
+                        <ui:Button Content="Teams" Background="#0078D4" Click="BtnEffect_Click" Tag="Auto" Grid.Row="1" Grid.Column="3" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
+                        <ui:Button Content="Help" Background="#696969" Click="BtnEffect_Click" Tag="255,255,255" Grid.Row="1" Grid.Column="4" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
+                        <ui:Button Content="Version" Background="#696969" Click="BtnEffect_Click" Tag="105,105,105" Grid.Row="1" Grid.Column="5" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Helligkeit -->
+                <GroupBox Header="Helligkeit" Margin="0,0,0,10">
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <TextBlock Text="Brightness 0..255" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <Slider x:Name="SldBrightness" Width="250" Minimum="0" Maximum="255" Value="128" ValueChanged="SldBrightness_ValueChanged" VerticalAlignment="Center"/>
+                        <ui:TextBlock x:Name="TxtBrightness" Text="128" Margin="10,0,0,0" VerticalAlignment="Center" Width="30"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <ComboBox x:Name="CmbPorts" Width="130" SelectionChanged="CmbPorts_SelectionChanged"/>
-                        <ui:Button x:Name="BtnConnect" Content="Verbinden" Icon="{ui:SymbolIcon Link24}" Click="BtnConnect_Click" Margin="10,0,0,0" Width="100"/>
-                    </StackPanel>
-                </StackPanel>
-                <StackPanel Grid.Column="2">
-                    <ui:TextBlock Text="Baudrate:" Margin="0,0,0,5" FontTypography="BodyStrong"/>
-                    <ComboBox x:Name="CmbBaudRate" SelectionChanged="CmbBaudRate_SelectionChanged">
-                        <ComboBoxItem Content="9600" IsSelected="True"/>
-                        <ComboBoxItem Content="19200"/>
-                        <ComboBoxItem Content="38400"/>
-                        <ComboBoxItem Content="57600"/>
-                        <ComboBoxItem Content="115200"/>
-                    </ComboBox>
-                </StackPanel>
-            </Grid>
+                </GroupBox>
 
-            <ui:TextBlock Text="Helligkeit:" Margin="0,0,0,5" FontTypography="BodyStrong"/>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                <Slider x:Name="SldBrightness" Width="320" Minimum="0" Maximum="255" Value="128" ValueChanged="SldBrightness_ValueChanged" VerticalAlignment="Center"/>
-                <ui:TextBlock x:Name="TxtBrightness" Text="128" Margin="10,0,0,0" VerticalAlignment="Center" Width="30"/>
+                <!-- Start / Automatik -->
+                <GroupBox Header="Start / Automatik" Margin="0,0,0,10">
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <CheckBox x:Name="ChkAutoConnect" Content="Automatisch verbinden" Grid.Row="0" Grid.Column="0" Margin="0,0,0,5" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
+                        <CheckBox x:Name="ChkStartMinimized" Content="Minimiert starten" Grid.Row="1" Grid.Column="0" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
+                        
+                        <CheckBox x:Name="ChkStartWindows" Content="Mit Windows starten" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5" Checked="ChkStartWindows_Changed" Unchecked="ChkStartWindows_Changed"/>
+                        <CheckBox x:Name="ChkSendFree" Content="Nach Verbindung 'free' senden" Grid.Row="1" Grid.Column="1" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Teams-Status (Lokale Logs) -->
+                <GroupBox Header="Teams-Status (Lokale Logs)" Margin="0,0,0,10">
+                    <Grid Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <CheckBox x:Name="ChkDebugLog" Content="Debug aktivieren (mehr Output)" Grid.Row="0" Grid.ColumnSpan="4" Margin="0,0,0,5" Checked="Setting_Changed" Unchecked="Setting_Changed"/>
+                        <CheckBox x:Name="ChkMonitorStatus" Content="Lokalen Teams-Status überwachen" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,10" Checked="ChkMonitorStatus_Changed" Unchecked="ChkMonitorStatus_Changed"/>
+                        
+                        <ui:Button Content="Starten" Grid.Row="2" Grid.Column="0" Margin="0,0,10,0" HorizontalAlignment="Stretch" Click="BtnStartMonitor_Click"/>
+                        <ui:Button Content="Testen" Grid.Row="2" Grid.Column="1" Margin="0,0,10,0" HorizontalAlignment="Stretch" Click="BtnTestStatus_Click"/>
+                        <ui:Button Content="Stoppen" Grid.Row="2" Grid.Column="2" Margin="0,0,10,0" HorizontalAlignment="Stretch" Click="BtnStopMonitor_Click"/>
+                        <ui:Button Content="Info" Grid.Row="2" Grid.Column="3" HorizontalAlignment="Stretch" Click="MenuItem_Info_Click"/>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Manuelles Kommando -->
+                <GroupBox Header="Manuelles Kommando" Margin="0,0,0,10">
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBox x:Name="TxtManualCommand" Grid.Column="0" Margin="0,0,10,0" PlaceholderText="Befehl eingeben..." KeyDown="TxtManualCommand_KeyDown"/>
+                        <ui:Button Content="Senden" Grid.Column="1" Click="BtnManualCommand_Click" Width="100"/>
+                    </Grid>
+                </GroupBox>
+
+                <!-- Log -->
+                <GroupBox Header="Log" Margin="0,0,0,10">
+                    <TextBox x:Name="TxtLogOutput" Height="150" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" IsReadOnly="True" FontFamily="Consolas" Background="#1E1E1E" Foreground="#CCCCCC"/>
+                </GroupBox>
             </StackPanel>
-
-            <ui:TextBlock Text="Modus:" Margin="0,0,0,5" FontTypography="BodyStrong"/>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                <ui:Button x:Name="BtnModeAuto" Content="Auto (Teams)" Click="BtnMode_Click" Tag="Auto" Padding="8,4" Margin="0,0,5,0" />
-                <ui:Button x:Name="BtnModeAvailable" Content="Verfügbar" Click="BtnMode_Click" Tag="A" Padding="8,4" Margin="0,0,5,0" />
-                <ui:Button x:Name="BtnModeBusy" Content="Beschäftigt" Click="BtnMode_Click" Tag="B" Padding="8,4" Margin="0,0,5,0" />
-                <ui:Button x:Name="BtnModeAway" Content="Abwesend" Click="BtnMode_Click" Tag="W" Padding="8,4" Margin="0,0,5,0" />
-            </StackPanel>
-
-            <ui:InfoBar x:Name="StatusInfoBar" Title="Status:" Message="Unbekannt" Severity="Informational" IsOpen="True" IsClosable="False" Margin="0,0,0,20"/>
-
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <ui:Button Content="Autostart installieren" Icon="{ui:SymbolIcon Add24}" Click="BtnInstallAutostart_Click" Margin="0,0,10,0" Padding="15,5"/>
-                <ui:Button Content="Autostart deinstallieren" Icon="{ui:SymbolIcon Delete24}" Click="BtnUninstallAutostart_Click" Margin="0,0,10,0" Padding="15,5" Appearance="Danger"/>
-                <ui:Button Content="Log öffnen" Icon="{ui:SymbolIcon Document24}" Click="MenuItem_OpenLog_Click" Padding="15,5" Margin="0,0,10,0"/>
-                <ui:Button Content="Info" Icon="{ui:SymbolIcon Info24}" Click="MenuItem_Info_Click" Padding="15,5" Appearance="Primary"/>
-            </StackPanel>
-        </StackPanel>
+        </ScrollViewer>
     </Grid>
 </ui:FluentWindow>

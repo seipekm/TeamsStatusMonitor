@@ -12,6 +12,20 @@ Adafruit_NeoPixel strip(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
 unsigned long lastReceiveTime = 0;
 const unsigned long TIMEOUT_MS = 6000; // Nach 6 Sekunden ohne Signal wird auf Violett geschaltet
 
+enum Mode {
+    MODE_SOLID,
+    MODE_BLAULICHT,
+    MODE_RAINBOW,
+    MODE_TIMEOUT
+};
+Mode currentMode = MODE_SOLID;
+
+uint8_t solidR = 0, solidG = 0, solidB = 0, globalBrightness = 128;
+
+// Variablen für Animationen
+unsigned long lastAnimTime = 0;
+uint16_t rainbowHue = 0;
+
 void setAllLeds(uint8_t r, uint8_t g, uint8_t b, uint8_t brightness) {
     strip.setBrightness(brightness);
     for (int i = 0; i < NUM_LEDS; i++) {
@@ -47,39 +61,81 @@ void loop() {
             // Signal empfangen -> Timeout zurücksetzen
             lastReceiveTime = millis();
 
-            // 2. Daten im Format "R,G,B,Brightness" auswerten
-            int comma1 = input.indexOf(',');
-            int comma2 = input.indexOf(',', comma1 + 1);
-            int comma3 = input.indexOf(',', comma2 + 1);
+            int firstComma = input.indexOf(',');
 
-            // Prüfen, ob wirklich 3 Kommas (also 4 Werte) vorhanden sind
-            if (comma1 > 0 && comma2 > 0 && comma3 > 0) {
-                int r = input.substring(0, comma1).toInt();
-                int g = input.substring(comma1 + 1, comma2).toInt();
-                int b = input.substring(comma2 + 1, comma3).toInt();
-                int brightness = input.substring(comma3 + 1).toInt();
+            if (input.startsWith("Blaulicht")) {
+                currentMode = MODE_BLAULICHT;
+                if (firstComma > 0) globalBrightness = constrain(input.substring(firstComma + 1).toInt(), 0, 255);
+            } 
+            else if (input.startsWith("Rainbow")) {
+                currentMode = MODE_RAINBOW;
+                if (firstComma > 0) globalBrightness = constrain(input.substring(firstComma + 1).toInt(), 0, 255);
+            } 
+            else {
+                // 2. Daten im Format "R,G,B,Brightness" auswerten
+                int comma1 = input.indexOf(',');
+                int comma2 = input.indexOf(',', comma1 + 1);
+                int comma3 = input.indexOf(',', comma2 + 1);
 
-                // Zur Sicherheit die Werte auf das Maximum 255 begrenzen
-                r = constrain(r, 0, 255);
-                g = constrain(g, 0, 255);
-                b = constrain(b, 0, 255);
-                brightness = constrain(brightness, 0, 255);
+                // Prüfen, ob wirklich 3 Kommas (also 4 Werte) vorhanden sind
+                if (comma1 > 0 && comma2 > 0 && comma3 > 0) {
+                    solidR = input.substring(0, comma1).toInt();
+                    solidG = input.substring(comma1 + 1, comma2).toInt();
+                    solidB = input.substring(comma2 + 1, comma3).toInt();
+                    globalBrightness = input.substring(comma3 + 1).toInt();
 
-                // LEDs setzen
-                setAllLeds(r, g, b, brightness);
+                    // Zur Sicherheit die Werte auf das Maximum 255 begrenzen
+                    solidR = constrain(solidR, 0, 255);
+                    solidG = constrain(solidG, 0, 255);
+                    solidB = constrain(solidB, 0, 255);
+                    globalBrightness = constrain(globalBrightness, 0, 255);
+
+                    currentMode = MODE_SOLID;
+                    setAllLeds(solidR, solidG, solidB, globalBrightness);
+                }
             }
         }
     }
 
     // 3. Timeout Check: Wenn z.B. der PC aus oder gesperrt ist (kein Signal mehr)
     if (millis() - lastReceiveTime > TIMEOUT_MS) {
-        // Violett (Not at desk / Offline) bei ca. 50% Helligkeit
-        // RGB für Violett z.B. 138, 43, 226
-        setAllLeds(138, 43, 226, 128); 
+        if (currentMode != MODE_TIMEOUT) {
+            currentMode = MODE_TIMEOUT;
+            setAllLeds(138, 43, 226, 128); // Violett
+        }
+    }
+
+    // 4. Animationen ausführen (ohne delay!)
+    if (currentMode == MODE_BLAULICHT) {
+        unsigned long now = millis();
+        int cycle = now % 500; // 500ms Zyklus
+        strip.setBrightness(globalBrightness);
+        strip.clear();
         
-        // Timeout-Wert sehr weit in die Zukunft setzen, 
-        // damit er nicht jeden Frame unnötig neu zeichnet, aber bei Überlauf trotzdem funktioniert
-        // (Wird beim nächsten validen Serial-Input sowieso wieder neu überschrieben)
-        delay(500); // Entlastet den Controller
+        // Doppelblitz: AN (0-40), AUS (40-80), AN (80-120), AUS (120-200)
+        // Dann andere Seite: AN (200-240), AUS (240-280), AN (280-320), AUS (320-500)
+        bool leftOn = (cycle >= 0 && cycle < 40) || (cycle >= 80 && cycle < 120);
+        bool rightOn = (cycle >= 200 && cycle < 240) || (cycle >= 280 && cycle < 320);
+
+        if (leftOn) {
+            for (int i = 0; i < NUM_LEDS / 2; i++) strip.setPixelColor(i, strip.Color(0, 0, 255));
+        }
+        if (rightOn) {
+            for (int i = NUM_LEDS / 2; i < NUM_LEDS; i++) strip.setPixelColor(i, strip.Color(0, 0, 255));
+        }
+        strip.show();
+    } 
+    else if (currentMode == MODE_RAINBOW) {
+        unsigned long now = millis();
+        // Langsame Farbverschiebung
+        rainbowHue = (now * 20) % 65536; 
+        strip.setBrightness(globalBrightness);
+        
+        for(int i = 0; i < NUM_LEDS; i++) {
+            // Farbkreis über alle LEDs verteilen
+            int pixelHue = rainbowHue + (i * 65536L / NUM_LEDS);
+            strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue)));
+        }
+        strip.show();
     }
 }

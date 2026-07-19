@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-        Title="Teams Status Monitor" SizeToContent="WidthAndHeight"
+        Title="Teams Status Monitor" Width="600" Height="800"
         WindowBackdropType="Mica" ExtendsContentIntoTitleBar="True" WindowCornerPreference="Round"
         ResizeMode="CanMinimize"
         Closing="Window_Closing">

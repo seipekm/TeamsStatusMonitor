@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 
-#define FIRMWARE_VERSION "1.2.6"
+#define FIRMWARE_VERSION "1.2.7"
 
 // Konfiguration der LED-Matrix
 #define LED_PIN    15   // Data Pin für die WS2812 LEDs
@@ -18,6 +18,7 @@ enum Mode {
     MODE_SOLID,
     MODE_BLAULICHT,
     MODE_RAINBOW,
+    MODE_FIRE,
     MODE_TIMEOUT
 };
 Mode currentMode = MODE_SOLID;
@@ -71,6 +72,10 @@ void loop() {
             } 
             else if (input.startsWith("Rainbow")) {
                 currentMode = MODE_RAINBOW;
+                if (firstComma > 0) globalBrightness = constrain(input.substring(firstComma + 1).toInt(), 0, 255);
+            } 
+            else if (input.startsWith("Fire")) {
+                currentMode = MODE_FIRE;
                 if (firstComma > 0) globalBrightness = constrain(input.substring(firstComma + 1).toInt(), 0, 255);
             } 
             else if (input.startsWith("VERSION")) {
@@ -143,5 +148,31 @@ void loop() {
             strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue)));
         }
         strip.show();
+    }
+    else if (currentMode == MODE_FIRE) {
+        unsigned long now = millis();
+        if (now - lastAnimTime > 50) { // Update alle 50ms
+            lastAnimTime = now;
+            strip.setBrightness(globalBrightness);
+            for(int i = 0; i < NUM_LEDS; i++) {
+                int r = 255;
+                int g = random(30, 120); // Orange bis leichtes Gelb
+                int b = 0;
+                
+                // Flackern
+                int flicker = random(0, 100);
+                r = constrain(r - flicker, 0, 255);
+                g = constrain(g - flicker, 0, 255);
+                
+                // Manche LEDs auch mal ganz aus für echten Feuer-Effekt
+                if (random(0, 10) > 8) {
+                    r = r / 3;
+                    g = g / 3;
+                }
+                
+                strip.setPixelColor(i, strip.Color(r, g, b));
+            }
+            strip.show();
+        }
     }
 }

@@ -99,11 +99,18 @@ namespace TeamsStatus
                             {
                                 string portName = caption.Substring(startIndex + 1, endIndex - startIndex - 1);
                                 string description = caption.Substring(0, startIndex).Trim();
+                                
+                                // Nur Raspberry Pi Pico (VID_2E8A) oder explizit Teams Status Monitor (PID_1234)
                                 if (pnpId.Contains("PID_1234")) 
                                 {
                                     description = "Teams Status Monitor";
+                                    ports.Add($"{portName} - {description}");
                                 }
-                                ports.Add($"{portName} - {description}");
+                                else if (pnpId.Contains("VID_2E8A"))
+                                {
+                                    description = "Raspberry Pi Pico";
+                                    ports.Add($"{portName} - {description}");
+                                }
                             }
                         }
                     }
@@ -114,9 +121,11 @@ namespace TeamsStatus
                 // Fallback falls WMI fehlschlägt
             }
 
-            foreach (var rp in rawPorts)
+            // Fallback, wenn keine passenden RP2040 Ports gefunden wurden: 
+            // Füge alle rawPorts hinzu, damit der User wenigstens etwas auswählen kann
+            if (ports.Count == 0)
             {
-                if (!System.Linq.Enumerable.Any(ports, p => p.StartsWith(rp + " ")))
+                foreach (var rp in rawPorts)
                 {
                     ports.Add(rp);
                 }

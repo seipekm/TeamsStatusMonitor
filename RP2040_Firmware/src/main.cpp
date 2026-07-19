@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 
-#define FIRMWARE_VERSION "1.2.4"
+#define FIRMWARE_VERSION "1.2.6"
 
 // Konfiguration der LED-Matrix
 #define LED_PIN    15   // Data Pin für die WS2812 LEDs
@@ -107,7 +107,7 @@ void loop() {
     if (millis() - lastReceiveTime > TIMEOUT_MS) {
         if (currentMode != MODE_TIMEOUT) {
             currentMode = MODE_TIMEOUT;
-            setAllLeds(138, 43, 226, 128); // Violett
+            setAllLeds(138, 43, 226, 255); // Violett
         }
     }
 

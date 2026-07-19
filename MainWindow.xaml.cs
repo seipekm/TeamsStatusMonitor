@@ -337,15 +337,24 @@ namespace TeamsStatus
                 using JsonDocument doc = JsonDocument.Parse(json);
                 
                 JsonElement? latestFwRelease = null;
+                JsonElement? fallbackRelease = null;
+                
                 foreach (var release in doc.RootElement.EnumerateArray())
                 {
                     string tagName = release.GetProperty("tag_name").GetString() ?? "";
-                    if (tagName.StartsWith("fw-v") || tagName.StartsWith("v"))
+                    if (tagName.StartsWith("fw-v") && latestFwRelease == null)
                     {
                         latestFwRelease = release;
-                        break;
                     }
+                    else if (tagName.StartsWith("v") && !tagName.StartsWith("app-v") && fallbackRelease == null)
+                    {
+                        fallbackRelease = release;
+                    }
+                    
+                    if (latestFwRelease != null) break;
                 }
+
+                latestFwRelease ??= fallbackRelease;
 
                 if (latestFwRelease == null)
                 {
@@ -1056,15 +1065,24 @@ namespace TeamsStatus
                 using JsonDocument doc = JsonDocument.Parse(json);
                 
                 JsonElement? latestAppRelease = null;
+                JsonElement? fallbackRelease = null;
+                
                 foreach (var release in doc.RootElement.EnumerateArray())
                 {
                     string tagName = release.GetProperty("tag_name").GetString() ?? "";
-                    if (tagName.StartsWith("app-v") || tagName.StartsWith("v"))
+                    if (tagName.StartsWith("app-v") && latestAppRelease == null)
                     {
                         latestAppRelease = release;
-                        break;
                     }
+                    else if (tagName.StartsWith("v") && !tagName.StartsWith("fw-v") && fallbackRelease == null)
+                    {
+                        fallbackRelease = release;
+                    }
+                    
+                    if (latestAppRelease != null) break;
                 }
+
+                latestAppRelease ??= fallbackRelease;
 
                 if (latestAppRelease == null)
                 {

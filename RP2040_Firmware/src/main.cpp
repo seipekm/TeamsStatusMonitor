@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 
-#define FIRMWARE_VERSION "1.2.3"
+#define FIRMWARE_VERSION "1.2.2"
 
 // Konfiguration der LED-Matrix
 #define LED_PIN    15   // Data Pin für die WS2812 LEDs

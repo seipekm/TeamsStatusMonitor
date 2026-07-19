@@ -80,7 +80,7 @@
                         <ui:Button Content="Fire" Background="#D2691E" Click="BtnEffect_Click" Tag="210,105,30" Grid.Row="1" Grid.Column="2" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
                         <ui:Button Content="Teams" Background="#0078D4" Click="BtnEffect_Click" Tag="Auto" Grid.Row="1" Grid.Column="3" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
                         <ui:Button Content="Help" Background="#696969" Click="BtnEffect_Click" Tag="255,255,255" Grid.Row="1" Grid.Column="4" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
-                        <ui:Button Content="Version" Background="#696969" Click="BtnEffect_Click" Tag="105,105,105" Grid.Row="1" Grid.Column="5" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
+                        <ui:Button Content="Version" Background="#696969" Click="BtnEffect_Click" Tag="VERSION" Grid.Row="1" Grid.Column="5" Margin="2" HorizontalAlignment="Stretch" Foreground="White" BorderThickness="0"/>
                     </Grid>
                 </GroupBox>
 

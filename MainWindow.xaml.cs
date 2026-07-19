@@ -307,6 +307,7 @@ namespace TeamsStatus
                     {
                         string version = data.Substring(8);
                         CurrentFirmwareVersion = version;
+                        Log($"Firmware-Version vom Gerät empfangen: {version}");
                     }
                 }
             }

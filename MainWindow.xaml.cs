@@ -62,7 +62,6 @@ namespace TeamsStatus
             LoadPorts();
             LoadSettings();
             _isLoaded = true;
-            _ = ConnectSerial(); // Automatisch beim Start mit den geladenen Settings verbinden
             
             // Start im zuletzt gespeicherten Modus
             if (_currentMode == "Auto" && !string.IsNullOrEmpty(_lastStatus) && _lastStatus != "U")
@@ -1272,6 +1271,7 @@ namespace TeamsStatus
 
         private void ChkStartWindows_Changed(object sender, RoutedEventArgs e)
         {
+            if (!_isLoaded) return;
             SaveSettings();
             if (ChkStartWindows.IsChecked == true)
             {

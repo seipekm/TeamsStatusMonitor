@@ -131,7 +131,7 @@ namespace TeamsStatus
 
                                     if (!string.IsNullOrEmpty(serial))
                                     {
-                                        description += $" ({serial})";
+                                        description = serial;
                                     }
 
                                     ports.Add($"{portName} - {description}");

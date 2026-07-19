@@ -268,6 +268,8 @@ namespace TeamsStatus
             try
             {
                 _serialPort = new SerialPort(port, baudRate);
+                _serialPort.DtrEnable = true;
+                _serialPort.RtsEnable = true;
                 _serialPort.DataReceived += SerialPort_DataReceived;
                 _serialPort.Open();
                 SetConnectionStatus(true);
@@ -300,14 +302,14 @@ namespace TeamsStatus
         {
             try
             {
-                if (_serialPort != null && _serialPort.IsOpen)
+                while (_serialPort != null && _serialPort.IsOpen && _serialPort.BytesToRead > 0)
                 {
                     string data = _serialPort.ReadLine().Trim();
+                    Log($"Empfangen: {data}");
                     if (data.StartsWith("VERSION:"))
                     {
                         string version = data.Substring(8);
                         CurrentFirmwareVersion = version;
-                        Log($"Firmware-Version vom Gerät empfangen: {version}");
                     }
                 }
             }

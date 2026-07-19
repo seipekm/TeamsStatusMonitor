@@ -1,9 +1,9 @@
-name: Build and Release
+name: Build and Release Firmware
 
 on:
   push:
     tags:
-      - 'v*' # Startet automatisch, wenn du ein Tag wie "v1.0" erstellst
+      - 'fw-v*' # Startet automatisch, wenn du ein Tag wie "fw-v1.0" erstellst
   workflow_dispatch: # Erlaubt den manuellen Start über den Browser
 
 jobs:
@@ -15,17 +15,6 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '10.0.x'
-
-    - name: Publish .NET App (Single File)
-      run: dotnet publish TeamsStatus.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish
-
-    - name: Zip the Output
-      run: Compress-Archive -Path ./publish/* -DestinationPath TeamsStatusMonitor_Windows_x64.zip
 
     - name: Cache pip
       uses: actions/cache@v4
@@ -57,18 +46,14 @@ jobs:
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ReleaseAssets
-        path: |
-          TeamsStatusMonitor_Windows_x64.zip
-          RP2040_Firmware/.pio/build/waveshare_rp2040_zero/firmware.uf2
+        name: ReleaseAssets-Firmware
+        path: RP2040_Firmware/.pio/build/waveshare_rp2040_zero/firmware.uf2
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('v1.0.{0}', github.run_number) }}
-        name: Release ${{ github.ref_type == 'tag' && github.ref_name || format('v1.0.{0}', github.run_number) }}
-        files: |
-          TeamsStatusMonitor_Windows_x64.zip
-          RP2040_Firmware/.pio/build/waveshare_rp2040_zero/firmware.uf2
+        tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('fw-v1.0.{0}', github.run_number) }}
+        name: Release Firmware ${{ github.ref_type == 'tag' && github.ref_name || format('fw-v1.0.{0}', github.run_number) }}
+        files: RP2040_Firmware/.pio/build/waveshare_rp2040_zero/firmware.uf2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

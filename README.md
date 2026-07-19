@@ -48,5 +48,13 @@ Die Desktop-App sendet alle 2 Sekunden folgenden String über die gewählte COM-
 Beispiel: `50,205,50,255\n` (Grün bei maximaler Helligkeit).
 Wird 6 Sekunden lang nichts empfangen, wechselt der RP2040 als Timeout-Schutz auf Violett.
 
+## Updates & Versionierung
+
+Das Projekt besteht aus zwei Komponenten, die unabhängig voneinander versioniert werden. Um ein neues Update über GitHub Actions zu erstellen, pushe ein Git-Tag mit dem passenden Präfix:
+- **`app-v*`** (z. B. `app-v1.3.0`): Erstellt ein Release für die **C# Desktop-App**.
+- **`fw-v*`** (z. B. `fw-v2.0.0`): Erstellt ein Release für die **RP2040 Firmware**.
+
+Die Desktop-App erkennt neue Versionen automatisch über die App-Oberfläche und lädt je nach Präfix nur das benötigte Paket (App oder Firmware) herunter.
+
 ## Lizenz
 MIT License (oder deine eigene Lizenz eintragen).

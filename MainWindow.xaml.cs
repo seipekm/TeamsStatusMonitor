@@ -325,7 +325,7 @@ namespace TeamsStatus
                 using var client = new HttpClient();
                 client.DefaultRequestHeaders.Add("User-Agent", "TeamsStatusMonitor");
                 
-                string url = "https://api.github.com/repos/seipekm/TeamsStatusMonitor/releases/latest";
+                string url = "https://api.github.com/repos/seipekm/TeamsStatusMonitor/releases";
                 var response = await client.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -335,9 +335,27 @@ namespace TeamsStatus
                 
                 string json = await response.Content.ReadAsStringAsync();
                 using JsonDocument doc = JsonDocument.Parse(json);
-                var root = doc.RootElement;
+                
+                JsonElement? latestFwRelease = null;
+                foreach (var release in doc.RootElement.EnumerateArray())
+                {
+                    string tagName = release.GetProperty("tag_name").GetString() ?? "";
+                    if (tagName.StartsWith("fw-v") || tagName.StartsWith("v"))
+                    {
+                        latestFwRelease = release;
+                        break;
+                    }
+                }
+
+                if (latestFwRelease == null)
+                {
+                    await ShowFluentMessageBoxAsync("Info", "Keine Firmware-Releases gefunden.");
+                    return;
+                }
+
+                var root = latestFwRelease.Value;
                 string tag = root.GetProperty("tag_name").GetString() ?? "";
-                string latestVersion = tag.TrimStart('v');
+                string latestVersion = tag.StartsWith("fw-v") ? tag.Substring(4) : tag.TrimStart('v');
 
                 if (Version.TryParse(latestVersion, out Version? latestV) && Version.TryParse(CurrentFirmwareVersion, out Version? currentV) && latestV != null && currentV != null)
                 {
@@ -1025,7 +1043,7 @@ namespace TeamsStatus
                 using var client = new HttpClient();
                 client.DefaultRequestHeaders.Add("User-Agent", "TeamsStatusMonitor");
                 
-                string url = "https://api.github.com/repos/seipekm/TeamsStatusMonitor/releases/latest";
+                string url = "https://api.github.com/repos/seipekm/TeamsStatusMonitor/releases";
                 var response = await client.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -1036,9 +1054,28 @@ namespace TeamsStatus
                 
                 string json = await response.Content.ReadAsStringAsync();
                 using JsonDocument doc = JsonDocument.Parse(json);
-                var root = doc.RootElement;
+                
+                JsonElement? latestAppRelease = null;
+                foreach (var release in doc.RootElement.EnumerateArray())
+                {
+                    string tagName = release.GetProperty("tag_name").GetString() ?? "";
+                    if (tagName.StartsWith("app-v") || tagName.StartsWith("v"))
+                    {
+                        latestAppRelease = release;
+                        break;
+                    }
+                }
+
+                if (latestAppRelease == null)
+                {
+                    if (showMessageIfUpToDate)
+                        await ShowFluentMessageBoxAsync("Info", "Keine App-Releases gefunden.");
+                    return;
+                }
+
+                var root = latestAppRelease.Value;
                 string tag = root.GetProperty("tag_name").GetString() ?? "";
-                string version = tag.TrimStart('v');
+                string version = tag.StartsWith("app-v") ? tag.Substring(5) : tag.TrimStart('v');
                 
                 // Aktuelle Version abfragen
                 string currentVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0.0";

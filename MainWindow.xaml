@@ -42,7 +42,7 @@
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <ComboBox x:Name="CmbPorts" Width="150" Grid.Column="0" Margin="0,0,10,0" SelectionChanged="CmbPorts_SelectionChanged"/>
+                            <ComboBox x:Name="CmbPorts" Width="250" Grid.Column="0" Margin="0,0,10,0" SelectionChanged="CmbPorts_SelectionChanged"/>
                             <ui:Button Content="Aktualisieren" Grid.Column="1" Margin="0,0,10,0" Click="BtnRefreshPorts_Click"/>
                             <ui:Button x:Name="BtnConnect" Content="Verbinden" Grid.Column="2" Click="BtnConnect_Click" Width="100"/>
                             <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">

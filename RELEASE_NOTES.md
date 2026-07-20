@@ -1,5 +1,13 @@
 # Release Notes
 
+## Version 1.2.13 (Firmware)
+*Veröffentlicht: 20. Juli 2026*
+
+### Neue Features ✨
+* **Helligkeits-Speicherung (EEPROM):** Die eingestellte Helligkeit wird nun im internen Flash-Speicher des RP2040 gesichert. Wird der Controller stromlos gemacht und neu gestartet, leuchtet er sofort wieder mit der zuletzt eingestellten Helligkeit, ohne dass die C#-App die Helligkeit erneut senden muss.
+
+---
+
 ## Version 1.2.12 (Firmware)
 *Veröffentlicht: 20. Juli 2026*
 

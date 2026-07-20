@@ -1,7 +1,8 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
+#include <EEPROM.h>
 
-#define FIRMWARE_VERSION "1.2.12"
+#define FIRMWARE_VERSION "1.2.13"
 
 // Konfiguration der LED-Matrix
 #define LED_PIN    15   // Data Pin für die WS2812 LEDs
@@ -30,6 +31,14 @@ uint8_t solidR = 0, solidG = 0, solidB = 0, globalBrightness = 128;
 unsigned long lastAnimTime = 0;
 uint16_t rainbowHue = 0;
 
+void setGlobalBrightness(uint8_t newBrightness) {
+    if (globalBrightness != newBrightness) {
+        globalBrightness = newBrightness;
+        EEPROM.write(1, globalBrightness);
+        EEPROM.commit();
+    }
+}
+
 void setAllLeds(uint8_t r, uint8_t g, uint8_t b, uint8_t brightness) {
     strip.setBrightness(brightness);
     for (int i = 0; i < NUM_LEDS; i++) {
@@ -41,6 +50,21 @@ void setAllLeds(uint8_t r, uint8_t g, uint8_t b, uint8_t brightness) {
 void setup() {
     // Serielle Verbindung starten (Baudrate muss mit C# App übereinstimmen)
     Serial.begin(9600); 
+
+    // EEPROM initialisieren (512 Bytes reservieren im Flash)
+    EEPROM.begin(512);
+    // Lade gespeicherte Helligkeit
+    // Byte 0: Magic Byte (0xAA) um zu prüfen ob jemals gespeichert wurde
+    // Byte 1: Helligkeitswert
+    if (EEPROM.read(0) == 0xAA) {
+        globalBrightness = EEPROM.read(1);
+    } else {
+        // Initiale Speicherung falls noch nie gesetzt
+        EEPROM.write(0, 0xAA);
+        EEPROM.write(1, 128); // Standardhelligkeit
+        EEPROM.commit();
+        globalBrightness = 128;
+    }
 
     // LEDs initialisieren
     strip.begin();
@@ -69,19 +93,19 @@ void loop() {
 
             if (input.startsWith("Blaulicht")) {
                 currentMode = MODE_BLAULICHT;
-                if (firstComma > 0) globalBrightness = constrain(input.substring(firstComma + 1).toInt(), 0, 255);
+                if (firstComma > 0) setGlobalBrightness(constrain(input.substring(firstComma + 1).toInt(), 0, 255));
             } 
             else if (input.startsWith("Rainbow")) {
                 currentMode = MODE_RAINBOW;
-                if (firstComma > 0) globalBrightness = constrain(input.substring(firstComma + 1).toInt(), 0, 255);
+                if (firstComma > 0) setGlobalBrightness(constrain(input.substring(firstComma + 1).toInt(), 0, 255));
             } 
             else if (input.startsWith("Fire")) {
                 currentMode = MODE_FIRE;
-                if (firstComma > 0) globalBrightness = constrain(input.substring(firstComma + 1).toInt(), 0, 255);
+                if (firstComma > 0) setGlobalBrightness(constrain(input.substring(firstComma + 1).toInt(), 0, 255));
             } 
             else if (input.startsWith("Ringing")) {
                 currentMode = MODE_RINGING;
-                if (firstComma > 0) globalBrightness = constrain(input.substring(firstComma + 1).toInt(), 0, 255);
+                if (firstComma > 0) setGlobalBrightness(constrain(input.substring(firstComma + 1).toInt(), 0, 255));
             } 
             else if (input.startsWith("VERSION")) {
                 Serial.print("VERSION:");
@@ -101,13 +125,13 @@ void loop() {
                     solidR = input.substring(0, comma1).toInt();
                     solidG = input.substring(comma1 + 1, comma2).toInt();
                     solidB = input.substring(comma2 + 1, comma3).toInt();
-                    globalBrightness = input.substring(comma3 + 1).toInt();
+                    uint8_t newBrightness = input.substring(comma3 + 1).toInt();
 
                     // Zur Sicherheit die Werte auf das Maximum 255 begrenzen
                     solidR = constrain(solidR, 0, 255);
                     solidG = constrain(solidG, 0, 255);
                     solidB = constrain(solidB, 0, 255);
-                    globalBrightness = constrain(globalBrightness, 0, 255);
+                    setGlobalBrightness(constrain(newBrightness, 0, 255));
 
                     currentMode = MODE_SOLID;
                     setAllLeds(solidR, solidG, solidB, globalBrightness);

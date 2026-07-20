@@ -1,5 +1,13 @@
 # Release Notes
 
+## Version 1.2.16 (App)
+*Veröffentlicht: 20. Juli 2026*
+
+### Bugfixes 🛠️
+* **Fenster Schließen-Button gefixt:** Es wurde ein Fehler behoben, bei dem die App nicht in den Tray minimiert wurde (bzw. sich nicht verstecken ließ), wenn man nach dem letzten App-Update in der Fensterleiste auf das "X" geklickt hat.
+
+---
+
 ## Version 1.2.13 (Firmware)
 *Veröffentlicht: 20. Juli 2026*
 

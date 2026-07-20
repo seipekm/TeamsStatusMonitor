@@ -1,5 +1,13 @@
 # Release Notes
 
+## Version 1.2.12 (Firmware)
+*Veröffentlicht: 20. Juli 2026*
+
+### Verbesserungen & Bugfixes 🛠️
+* **Timeout/Violett-Animation:** Die pulsierende Timeout-Animation skaliert nun korrekt mit der in der App eingestellten allgemeinen Helligkeit (Slider) anstatt immer auf voller Helligkeit zu pulsieren.
+
+---
+
 ## Version 1.2.15 (App)
 *Veröffentlicht: 20. Juli 2026*
 

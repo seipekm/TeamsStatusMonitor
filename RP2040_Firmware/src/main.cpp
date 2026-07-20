@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 
-#define FIRMWARE_VERSION "1.2.11"
+#define FIRMWARE_VERSION "1.2.12"
 
 // Konfiguration der LED-Matrix
 #define LED_PIN    15   // Data Pin für die WS2812 LEDs
@@ -189,7 +189,7 @@ void loop() {
         float sinVal = (sin(now / 600.0) + 1.0) / 2.0; // 0.0 bis 1.0, sehr langsam
         
         // Helligkeit von 10 (nicht ganz aus) bis 200 (nicht ganz hell)
-        uint8_t breathBrightness = 10 + (uint8_t)(sinVal * 190);
+        uint8_t breathBrightness = 10 + (uint8_t)(sinVal * globalBrightness);
         
         strip.setBrightness(breathBrightness);
         for(int i = 0; i < NUM_LEDS; i++) {

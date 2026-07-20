@@ -35,6 +35,10 @@ namespace TeamsStatus
         private bool _isWebSocketInMeeting = false;
         private string _lastParsedLogStatus = "";
 
+        /// <summary>
+        /// Initialisiert das Hauptfenster, startet Timer, lädt Einstellungen und initialisiert 
+        /// den WebSocket-Service sowie die zyklische Überprüfung.
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
@@ -128,6 +132,10 @@ namespace TeamsStatus
             }
         }
 
+        /// <summary>
+        /// Sucht in WMI nach allen verfügbaren seriellen Ports und versucht,
+        /// spezifisch den Raspberry Pi Pico bzw. Teams Status Monitor zu identifizieren.
+        /// </summary>
         private void LoadPorts()
         {
             List<PortItem> ports = new List<PortItem>();
@@ -362,6 +370,10 @@ namespace TeamsStatus
             }
         }
 
+        /// <summary>
+        /// Stellt asynchron die serielle Verbindung (COM-Port) zum Raspberry Pi Pico (RP2040) her
+        /// und initialisiert den Lesethread für einkommende Bestätigungen.
+        /// </summary>
         private async Task ConnectSerial()
         {
             if (CmbPorts.SelectedItem is not PortItem selectedItem) return;
@@ -432,6 +444,10 @@ namespace TeamsStatus
         public string CurrentFirmwareVersion { get; set; } = "Unbekannt";
         public bool FirmwareUpdateFailed { get; set; } = false;
 
+        /// <summary>
+        /// Prüft auf GitHub, ob eine neuere Firmware (.uf2) für den Mikrocontroller verfügbar ist,
+        /// und führt den Download sowie ein Update-Fenster aus, falls ja.
+        /// </summary>
         public async Task CheckAndPerformFirmwareUpdate()
         {
             try
@@ -805,6 +821,11 @@ namespace TeamsStatus
             SaveSettings();
         }
 
+        /// <summary>
+        /// Sendet einen formatierten Status-String über die serielle Schnittstelle an den Mikrocontroller.
+        /// Berücksichtigt dabei die ausgewählte Helligkeit der UI.
+        /// </summary>
+        /// <param name="data">Der Status, z.B. "A", "B", "Ringing" usw.</param>
         public void SendStatus(string data)
         {
             if (string.IsNullOrEmpty(data)) return;
@@ -847,6 +868,10 @@ namespace TeamsStatus
             }
         }
 
+        /// <summary>
+        /// Startet die asynchrone Überwachung der Teams-Logdateien in einem Hintergrund-Task.
+        /// Wird aufgerufen, wenn der "Auto"-Modus aktiviert wird.
+        /// </summary>
         private void StartMonitoring()
         {
             StopMonitoring();
@@ -864,6 +889,12 @@ namespace TeamsStatus
             }
         }
 
+        /// <summary>
+        /// Das Herzstück der Automatik: Analysiert zyklisch die neuesten Microsoft Teams Log-Dateien,
+        /// um den Anwesenheits- und Anrufstatus (Available, Busy, DND, Ringing) zu ermitteln.
+        /// Diese Methode läuft durchgehend im Hintergrund.
+        /// </summary>
+        /// <param name="token">Cancellation Token zum sauberen Beenden des Threads.</param>
         private async Task MonitorTeamsLogAsync(CancellationToken token)
         {
             // Ordner-Pfade
@@ -1219,6 +1250,11 @@ namespace TeamsStatus
 
         private bool _isUpdateCheckRunning = false;
 
+        /// <summary>
+        /// Prüft asynchron die GitHub Releases-API auf neue App-Versionen.
+        /// Falls eine neuere Version gefunden wird, kann ein Dialog zur direkten Installation angezeigt werden.
+        /// </summary>
+        /// <param name="showMessageIfUpToDate">Gibt an, ob eine "Kein Update verfügbar"-Meldung erscheinen soll.</param>
         public async Task CheckAndPerformAppUpdate(bool showMessageIfUpToDate = false)
         {
             if (_isUpdateCheckRunning) return;

@@ -8,6 +8,10 @@ using System.Diagnostics;
 
 namespace TeamsStatus
 {
+    /// <summary>
+    /// Service zur Kommunikation mit der lokalen Microsoft Teams Third-Party WebSocket API.
+    /// Wird hauptsächlich genutzt, um In-Meeting und Mute-Status in Echtzeit zu empfangen.
+    /// </summary>
     public class TeamsWebSocketService
     {
         private ClientWebSocket? _ws;
@@ -24,6 +28,9 @@ namespace TeamsStatus
             _token = initialToken;
         }
 
+        /// <summary>
+        /// Startet den WebSocket-Client im Hintergrund, welcher versucht, sich mit Teams zu verbinden.
+        /// </summary>
         public void Start()
         {
             Stop();
@@ -31,6 +38,9 @@ namespace TeamsStatus
             _ = ConnectLoopAsync(_cts.Token);
         }
 
+        /// <summary>
+        /// Stoppt den WebSocket-Client und beendet alle Hintergrund-Tasks.
+        /// </summary>
         public void Stop()
         {
             if (_cts != null)
@@ -46,6 +56,10 @@ namespace TeamsStatus
             }
         }
 
+        /// <summary>
+        /// Wartet, bis Teams gestartet wurde und versucht anschließend, eine WebSocket-Verbindung
+        /// auf Port 8124 herzustellen. Bei Verbindungsabbruch wird periodisch ein Reconnect versucht.
+        /// </summary>
         private async Task ConnectLoopAsync(CancellationToken token)
         {
             bool wasTeamsRunning = true; // um Log-Spam beim Statuswechsel zu vermeiden
@@ -89,6 +103,9 @@ namespace TeamsStatus
             }
         }
 
+        /// <summary>
+        /// Wartet asynchron auf eingehende Nachrichten vom WebSocket und reicht diese an den Parser weiter.
+        /// </summary>
         private async Task ReceiveLoopAsync(ClientWebSocket ws, CancellationToken token)
         {
             var buffer = new byte[8192];
@@ -108,6 +125,10 @@ namespace TeamsStatus
             }
         }
 
+        /// <summary>
+        /// Parst die empfangenen JSON-Nachrichten von Teams und löst die entsprechenden Events
+        /// für Tokens, Call-Status oder Meeting-Status aus.
+        /// </summary>
         private void ParseMessage(string msg)
         {
             try

@@ -1,5 +1,13 @@
 # Release Notes
 
+## Version 1.2.19 (App) & 1.2.14 (Firmware)
+*Veröffentlicht: 20. Juli 2026*
+
+### Änderungen 📝
+* **Dokumentation:** Umfangreiche Entwickler-Kommentare (XML-Docs) im C#-Code (MainWindow, WebSocketService) und C++-Code (Arduino main.cpp) hinzugefügt, um die Wartbarkeit und das Code-Verständnis zu verbessern.
+
+---
+
 ## Version 1.2.18 (App)
 *Veröffentlicht: 20. Juli 2026*
 

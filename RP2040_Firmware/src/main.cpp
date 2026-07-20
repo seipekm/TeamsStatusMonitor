@@ -2,7 +2,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <EEPROM.h>
 
-#define FIRMWARE_VERSION "1.2.13"
+#define FIRMWARE_VERSION "1.2.14"
 
 // Konfiguration der LED-Matrix
 #define LED_PIN    15   // Data Pin für die WS2812 LEDs
@@ -31,6 +31,12 @@ uint8_t solidR = 0, solidG = 0, solidB = 0, globalBrightness = 128;
 unsigned long lastAnimTime = 0;
 uint16_t rainbowHue = 0;
 
+/**
+ * Setzt die globale Helligkeit der LED-Matrix und speichert den Wert
+ * dauerhaft im internen EEPROM (Flash), falls er sich geändert hat.
+ * 
+ * @param newBrightness Der neue Helligkeitswert (0-255)
+ */
 void setGlobalBrightness(uint8_t newBrightness) {
     if (globalBrightness != newBrightness) {
         globalBrightness = newBrightness;
@@ -39,6 +45,15 @@ void setGlobalBrightness(uint8_t newBrightness) {
     }
 }
 
+/**
+ * Setzt alle LEDs der Matrix auf eine einheitliche Farbe (R,G,B) 
+ * unter Berücksichtigung der globalen Helligkeit.
+ * 
+ * @param r Rot-Wert (0-255)
+ * @param g Grün-Wert (0-255)
+ * @param b Blau-Wert (0-255)
+ * @param brightness Helligkeits-Skalierung (0-255)
+ */
 void setAllLeds(uint8_t r, uint8_t g, uint8_t b, uint8_t brightness) {
     strip.setBrightness(brightness);
     for (int i = 0; i < NUM_LEDS; i++) {
@@ -47,6 +62,11 @@ void setAllLeds(uint8_t r, uint8_t g, uint8_t b, uint8_t brightness) {
     strip.show();
 }
 
+/**
+ * Initialisierungs-Routine (wird einmalig beim Starten des Mikrocontrollers aufgerufen).
+ * Konfiguriert die serielle Schnittstelle, lädt Einstellungen aus dem EEPROM,
+ * initialisiert den LED-Strip und spielt eine kurze Startanimation ab.
+ */
 void setup() {
     // Serielle Verbindung starten (Baudrate muss mit C# App übereinstimmen)
     Serial.begin(9600); 
@@ -79,6 +99,11 @@ void setup() {
     lastReceiveTime = millis();
 }
 
+/**
+ * Haupt-Schleife (wird fortlaufend in hoher Frequenz ausgeführt).
+ * Liest serielle Befehle von der C#-Anwendung aus, aktualisiert den Betriebsmodus,
+ * prüft auf Timeouts (Verbindungsabbruch) und rendert die aktiven LED-Animationen.
+ */
 void loop() {
     // 1. Serielle Daten einlesen
     if (Serial.available()) {

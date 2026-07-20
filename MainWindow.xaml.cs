@@ -32,6 +32,8 @@ namespace TeamsStatus
         private string _currentMode = "Auto";
         private string _teamsWebSocketToken = "";
         private TeamsWebSocketService? _webSocketService;
+        private bool _isWebSocketInMeeting = false;
+        private string _lastParsedLogStatus = "";
 
         public MainWindow()
         {
@@ -74,6 +76,7 @@ namespace TeamsStatus
                 Dispatcher.Invoke(() => SaveSettings());
             };
             _webSocketService.OnMeetingStateChanged += (isInMeeting, isMuted) => {
+                _isWebSocketInMeeting = isInMeeting;
                 Dispatcher.Invoke(() => {
                     if (_currentMode != "Auto") return;
                     
@@ -655,6 +658,7 @@ namespace TeamsStatus
         private void SetMode(string tag)
         {
             _currentMode = tag;
+            _lastParsedLogStatus = ""; // Erzwinge UI-Update beim nächsten Log-Scan
             SaveSettings();
 
             if (tag == "Auto") 
@@ -969,10 +973,10 @@ namespace TeamsStatus
                                 foreach (System.Text.RegularExpressions.Match m in incomingMatches) if (m.Index > lastIncomingCallIdx) lastIncomingCallIdx = m.Index;
 
                                 int lastCallEndedIdx = -1;
-                                var endedMatches = System.Text.RegularExpressions.Regex.Matches(content, @"reportCallEnded");
+                                var endedMatches = System.Text.RegularExpressions.Regex.Matches(content, @"reportCall(Ended|Answered|Accepted|Connected)");
                                 foreach (System.Text.RegularExpressions.Match m in endedMatches) if (m.Index > lastCallEndedIdx) lastCallEndedIdx = m.Index;
 
-                                if (lastIncomingCallIdx > lastCallEndedIdx && lastIncomingCallIdx > maxIndex)
+                                if (lastIncomingCallIdx > lastCallEndedIdx && lastIncomingCallIdx > maxIndex && !_isWebSocketInMeeting)
                                 {
                                     parsedStatus = "Ringing";
                                     maxIndex = lastIncomingCallIdx;
@@ -980,16 +984,26 @@ namespace TeamsStatus
 
                                 if (maxIndex > -1)
                                 {
-                                    if (parsedStatus.Equals("Available", StringComparison.OrdinalIgnoreCase))
-                                        UpdateStatus("Auto: Verfügbar", 'A');
-                                    else if (parsedStatus == "DoNotDisturb" || parsedStatus == "dnd")
-                                        UpdateStatus("Auto: Nicht stören", 'D');
-                                    else if (parsedStatus == "Busy" || parsedStatus == "InAMeeting")
-                                        UpdateStatus("Auto: Beschäftigt", 'B');
-                                    else if (parsedStatus == "Away" || parsedStatus == "BeRightBack" || parsedStatus == "brb")
-                                        UpdateStatus("Auto: Abwesend", 'W');
-                                    else if (parsedStatus == "Ringing")
-                                        UpdateStatus("Auto: Eingehender Anruf (Klingelt)", 'R');
+                                    if (parsedStatus != _lastParsedLogStatus)
+                                    {
+                                        _lastParsedLogStatus = parsedStatus;
+                                        
+                                        // Wenn wir laut WebSocket im Meeting sind, lassen wir den WebSocket dominieren (In a call).
+                                        // Wir unterdrücken Log-Updates, bis das Meeting vorbei ist und sich der Status wieder ändert.
+                                        if (!_isWebSocketInMeeting)
+                                        {
+                                            if (parsedStatus.Equals("Available", StringComparison.OrdinalIgnoreCase))
+                                                UpdateStatus("Auto: Verfügbar", 'A');
+                                            else if (parsedStatus == "DoNotDisturb" || parsedStatus == "dnd")
+                                                UpdateStatus("Auto: Nicht stören", 'D');
+                                            else if (parsedStatus == "Busy" || parsedStatus == "InAMeeting")
+                                                UpdateStatus("Auto: Beschäftigt", 'B');
+                                            else if (parsedStatus == "Away" || parsedStatus == "BeRightBack" || parsedStatus == "brb")
+                                                UpdateStatus("Auto: Abwesend", 'W');
+                                            else if (parsedStatus == "Ringing")
+                                                UpdateStatus("Auto: Eingehender Anruf (Klingelt)", 'R');
+                                        }
+                                    }
                                     
                                     foundStatus = true;
                                     break;

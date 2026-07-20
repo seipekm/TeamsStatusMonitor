@@ -1,5 +1,13 @@
 # Release Notes
 
+## Version 1.2.17 (App)
+*Veröffentlicht: 20. Juli 2026*
+
+### Neue Features ✨
+* **Automatische Update-Prüfung:** Die App prüft nun im Hintergrund stündlich auf neue Updates. Falls ein neues Update verfügbar ist, erscheint ein Benachrichtigungs-Dialog, ohne dass die App dafür neu gestartet werden muss.
+
+---
+
 ## Version 1.2.16 (App)
 *Veröffentlicht: 20. Juli 2026*
 

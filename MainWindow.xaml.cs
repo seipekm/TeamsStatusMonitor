@@ -1108,6 +1108,8 @@ namespace TeamsStatus
             _isLoaded = true;
         }
 
+        private System.Windows.Threading.DispatcherTimer? _updateCheckTimer;
+
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
 
@@ -1120,6 +1122,15 @@ namespace TeamsStatus
             {
                 _ = CheckAndPerformAppUpdate(false);
             }
+            
+            // Start cyclical update check every hour
+            _updateCheckTimer = new System.Windows.Threading.DispatcherTimer();
+            _updateCheckTimer.Interval = TimeSpan.FromHours(1);
+            _updateCheckTimer.Tick += (s, args) =>
+            {
+                _ = CheckAndPerformAppUpdate(false);
+            };
+            _updateCheckTimer.Start();
         }
 
 
@@ -1201,8 +1212,12 @@ namespace TeamsStatus
             infoWindow.ShowDialog();
         }
 
+        private bool _isUpdateCheckRunning = false;
+
         public async Task CheckAndPerformAppUpdate(bool showMessageIfUpToDate = false)
         {
+            if (_isUpdateCheckRunning) return;
+            _isUpdateCheckRunning = true;
             try
             {
                 using var client = new HttpClient();
@@ -1298,6 +1313,10 @@ namespace TeamsStatus
             {
                 if (showMessageIfUpToDate)
                     await ShowFluentMessageBoxAsync("Fehler", $"Fehler bei der Update-Prüfung: {ex.Message}");
+            }
+            finally
+            {
+                _isUpdateCheckRunning = false;
             }
         }
 

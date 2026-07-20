@@ -77,19 +77,9 @@ namespace TeamsStatus
             };
             _webSocketService.OnMeetingStateChanged += (isInMeeting, isMuted) => {
                 _isWebSocketInMeeting = isInMeeting;
-                Dispatcher.Invoke(() => {
-                    if (_currentMode != "Auto") return;
-                    
-                    if (isInMeeting)
-                    {
-                        UpdateStatus("Auto: In a call", 'B'); // 'B' = Busy / Red
-                    }
-                    else
-                    {
-                        // Fallback to latest polled status from log
-                        UpdateStatus("Auto: Meeting beendet, warte auf Präsenz...", 'O'); // Offline/Free temporarily until log parser picks up
-                    }
-                });
+                // WebSocket ändert nicht mehr aktiv das UI/die Farbe!
+                // Wir nutzen _isWebSocketInMeeting nur noch intern im Log-Scanner, um das Ringing nach dem Abheben zu stoppen.
+                // Künftige Erweiterung: Hier könnte später Mute/Cam-Status an den Mikrocontroller gesendet werden.
             };
             _webSocketService.OnCallStateChanged += (isRinging) => {
                 Dispatcher.Invoke(() => {
@@ -988,21 +978,17 @@ namespace TeamsStatus
                                     {
                                         _lastParsedLogStatus = parsedStatus;
                                         
-                                        // Wenn wir laut WebSocket im Meeting sind, lassen wir den WebSocket dominieren (In a call).
-                                        // Wir unterdrücken Log-Updates, bis das Meeting vorbei ist und sich der Status wieder ändert.
-                                        if (!_isWebSocketInMeeting)
-                                        {
-                                            if (parsedStatus.Equals("Available", StringComparison.OrdinalIgnoreCase))
-                                                UpdateStatus("Auto: Verfügbar", 'A');
-                                            else if (parsedStatus == "DoNotDisturb" || parsedStatus == "dnd")
-                                                UpdateStatus("Auto: Nicht stören", 'D');
-                                            else if (parsedStatus == "Busy" || parsedStatus == "InAMeeting")
-                                                UpdateStatus("Auto: Beschäftigt", 'B');
-                                            else if (parsedStatus == "Away" || parsedStatus == "BeRightBack" || parsedStatus == "brb")
-                                                UpdateStatus("Auto: Abwesend", 'W');
-                                            else if (parsedStatus == "Ringing")
-                                                UpdateStatus("Auto: Eingehender Anruf (Klingelt)", 'R');
-                                        }
+                                        // Der Log-Scanner hat jetzt wieder volle Priorität über die Farben!
+                                        if (parsedStatus.Equals("Available", StringComparison.OrdinalIgnoreCase))
+                                            UpdateStatus("Auto: Verfügbar", 'A');
+                                        else if (parsedStatus == "DoNotDisturb" || parsedStatus == "dnd")
+                                            UpdateStatus("Auto: Nicht stören", 'D');
+                                        else if (parsedStatus == "Busy" || parsedStatus == "InAMeeting")
+                                            UpdateStatus("Auto: Beschäftigt", 'B');
+                                        else if (parsedStatus == "Away" || parsedStatus == "BeRightBack" || parsedStatus == "brb")
+                                            UpdateStatus("Auto: Abwesend", 'W');
+                                        else if (parsedStatus == "Ringing")
+                                            UpdateStatus("Auto: Eingehender Anruf (Klingelt)", 'R');
                                     }
                                     
                                     foundStatus = true;

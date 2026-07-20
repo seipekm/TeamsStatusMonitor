@@ -1112,6 +1112,11 @@ namespace TeamsStatus
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            // Ein kurzer Delay ist ZWINGEND erforderlich, da WPF-UI (FluentWindow) 
+            // das WindowChrome (Titelleiste) initialisiert. Wenn sofort im Loaded-Event 
+            // ein modaler Dialog (MessageBox) geöffnet wird, unterbricht dies den Message Loop,
+            // und die Buttons "X" (Schließen) sowie "Minimieren" werden nicht anklickbar (als wäre eine unsichtbare Ebene darüber).
+            await Task.Delay(500);
 
             string[] args = Environment.GetCommandLineArgs();
             if (args.Contains("-updated"))

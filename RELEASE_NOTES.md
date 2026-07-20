@@ -1,5 +1,13 @@
 # Release Notes
 
+## Version 1.2.18 (App)
+*Veröffentlicht: 20. Juli 2026*
+
+### Bugfixes 🛠️
+* **TitleBar / Fenster-Buttons gefixt:** Es wurde ein WPF-Bug behoben, bei dem die Update-Benachrichtigung nach einem Neustart zu schnell geladen wurde. Dies blockierte die Initialisierung der Fensterleiste, wodurch das Fenster nicht mehr über das "X" oder "Minimieren" bedient werden konnte.
+
+---
+
 ## Version 1.2.17 (App)
 *Veröffentlicht: 20. Juli 2026*
 

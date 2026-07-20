@@ -947,6 +947,22 @@ namespace TeamsStatus
                                     }
                                 }
 
+                                // Fallback: Suche nach "availability" (UserPresenceAction oder UserDataGlobalState)
+                                // Auch wenn bei mehreren Accounts Ungenauigkeiten auftreten können, ist dies besser als gar kein Status.
+                                var availabilityMatches = System.Text.RegularExpressions.Regex.Matches(content, @"\""availability\""\s*:\s*\""([a-zA-Z]+)\""", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                                foreach (System.Text.RegularExpressions.Match m in availabilityMatches)
+                                {
+                                    if (m.Index > maxIndex)
+                                    {
+                                        string availStatus = m.Groups[1].Value.ToLower();
+                                        if (availStatus.Contains("avail") || availStatus == "free") { maxIndex = m.Index; parsedStatus = "Available"; }
+                                        else if (availStatus.Contains("busy") || availStatus.Contains("meeting")) { maxIndex = m.Index; parsedStatus = "Busy"; }
+                                        else if (availStatus.Contains("distrb") || availStatus.Contains("disturb") || availStatus.Contains("dnd")) { maxIndex = m.Index; parsedStatus = "DoNotDisturb"; }
+                                        else if (availStatus.Contains("away")) { maxIndex = m.Index; parsedStatus = "Away"; }
+                                        else if (availStatus.Contains("rightback") || availStatus.Contains("brb")) { maxIndex = m.Index; parsedStatus = "BeRightBack"; }
+                                    }
+                                }
+
                                 // Check Calls
                                 int lastIncomingCallIdx = -1;
                                 var incomingMatches = System.Text.RegularExpressions.Regex.Matches(content, @"reportIncomingCall");

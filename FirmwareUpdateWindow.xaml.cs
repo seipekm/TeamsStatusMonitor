@@ -129,12 +129,12 @@ namespace TeamsStatus
             // esptool Pfad
             string localAppData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TeamsStatusMonitor", "esptool");
             Directory.CreateDirectory(localAppData);
-            string esptoolExe = Path.Combine(localAppData, "esptool-v4.8.1-win64", "esptool.exe");
+            string esptoolExe = Path.Combine(localAppData, "esptool-win64", "esptool.exe");
             
             if (!File.Exists(esptoolExe))
             {
                 TxtDetail.Text = "Lade esptool herunter...";
-                string esptoolUrl = "https://github.com/espressif/esptool/releases/download/v4.8.1/esptool-v4.8.1-win64.zip";
+                string esptoolUrl = "https://github.com/espressif/esptool/releases/download/v4.8.1/esptool-win64.zip";
                 string zipPath = Path.Combine(localAppData, "esptool.zip");
                 
                 using (var client = new HttpClient())

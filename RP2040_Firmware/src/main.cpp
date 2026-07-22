@@ -2,7 +2,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <EEPROM.h>
 
-#define FIRMWARE_VERSION "1.2.17"
+#define FIRMWARE_VERSION "1.2.18"
 
 // Konfiguration der LED-Matrix
 #if defined(ARDUINO_ARCH_ESP32)
@@ -73,7 +73,10 @@ void setAllLeds(uint8_t r, uint8_t g, uint8_t b, uint8_t brightness) {
  */
 void setup() {
     // Serielle Verbindung starten (Baudrate muss mit C# App übereinstimmen)
-    Serial.begin(9600); 
+    Serial.begin(9600);
+#if defined(ARDUINO_ARCH_ESP32)
+    Serial.setTxTimeoutMs(0); // Verhindert Aufhaengen bei USB Disconnect
+#endif 
 
     // EEPROM initialisieren (512 Bytes reservieren im Flash)
     EEPROM.begin(512);

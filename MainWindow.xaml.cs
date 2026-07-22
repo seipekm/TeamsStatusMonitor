@@ -204,9 +204,9 @@ namespace TeamsStatus
                                     {
                                         description = serial;
                                     }
-                                }
 
-                                ports.Add(new PortItem { PortName = portName, DisplayName = description });
+                                    ports.Add(new PortItem { PortName = portName, DisplayName = description });
+                                }
                             }
                         }
                     }

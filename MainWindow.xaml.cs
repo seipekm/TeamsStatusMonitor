@@ -163,12 +163,12 @@ namespace TeamsStatus
                             {
                                 string portName = caption.Substring(startIndex + 1, endIndex - startIndex - 1);
                                 string description = caption.Substring(0, startIndex).Trim();
-                                // Für alle USB-Geräte versuchen wir die Seriennummer auszulesen
-                                if (pnpId.Contains("USB\\VID_")) 
+                                // Nur spezifische VIDs/PIDs für Pico und ESP32 anzeigen
+                                if (pnpId.Contains("PID_1234") || pnpId.Contains("VID_2E8A") || pnpId.Contains("VID_2886") || pnpId.Contains("VID_303A") || pnpId.Contains("VID_10C4")) 
                                 {
                                     if (pnpId.Contains("PID_1234")) description = "Teams Status Monitor";
                                     else if (pnpId.Contains("VID_2E8A")) description = "Raspberry Pi Pico / RP2350";
-                                    else description = "USB Controller";
+                                    else description = "ESP32 Controller";
                                     
                                     // Versuche, die Seriennummer des USB-Root-Geräts zu ermitteln
                                     string serial = "";

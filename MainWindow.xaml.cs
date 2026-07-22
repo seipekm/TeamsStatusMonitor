@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
@@ -163,11 +163,12 @@ namespace TeamsStatus
                             {
                                 string portName = caption.Substring(startIndex + 1, endIndex - startIndex - 1);
                                 string description = caption.Substring(0, startIndex).Trim();
-                                
-                                // Nur Raspberry Pi Pico (VID_2E8A) oder explizit Teams Status Monitor (PID_1234)
-                                if (pnpId.Contains("PID_1234") || pnpId.Contains("VID_2E8A")) 
+                                // Für alle USB-Geräte versuchen wir die Seriennummer auszulesen
+                                if (pnpId.Contains("USB\\VID_")) 
                                 {
-                                    description = pnpId.Contains("PID_1234") ? "Teams Status Monitor" : "Raspberry Pi Pico";
+                                    if (pnpId.Contains("PID_1234")) description = "Teams Status Monitor";
+                                    else if (pnpId.Contains("VID_2E8A")) description = "Raspberry Pi Pico / RP2350";
+                                    else description = "USB Controller";
                                     
                                     // Versuche, die Seriennummer des USB-Root-Geräts zu ermitteln
                                     string serial = "";
@@ -191,15 +192,21 @@ namespace TeamsStatus
                                                 }
                                             }
                                         }
+                                        else
+                                        {
+                                            // Wenn es kein &MI_ gibt, ist das Gerät oft schon das Root-Gerät
+                                            // Format: USB\VID_xxxx&PID_yyyy\SERIAL
+                                            serial = pnpId.Substring(pnpId.LastIndexOf('\\') + 1);
+                                        }
                                     } catch {}
 
                                     if (!string.IsNullOrEmpty(serial))
                                     {
                                         description = serial;
                                     }
-
-                                    ports.Add(new PortItem { PortName = portName, DisplayName = description });
                                 }
+
+                                ports.Add(new PortItem { PortName = portName, DisplayName = description });
                             }
                         }
                     }

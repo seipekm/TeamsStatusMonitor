@@ -514,7 +514,7 @@ namespace TeamsStatus
                         if (result == Wpf.Ui.Controls.MessageBoxResult.Primary)
                         {
                             string downloadUrl = "";
-                            string targetAsset = CurrentFirmwareArchitecture == "ESP32" ? "firmware.bin" : "firmware.uf2";
+                        string targetAsset = CurrentFirmwareArchitecture == "ESP32" ? "ESP32_firmware.bin" : "RP2040_firmware.uf2";
                             if (root.TryGetProperty("assets", out JsonElement assets))
                             {
                                 foreach (var asset in assets.EnumerateArray())
@@ -549,7 +549,7 @@ namespace TeamsStatus
                     if (result == Wpf.Ui.Controls.MessageBoxResult.Primary)
                     {
                         string downloadUrl = "";
-                        string targetAsset = CurrentFirmwareArchitecture == "ESP32" ? "firmware.bin" : "firmware.uf2";
+                        string targetAsset = CurrentFirmwareArchitecture == "ESP32" ? "ESP32_firmware.bin" : "RP2040_firmware.uf2";
                         if (root.TryGetProperty("assets", out JsonElement assets))
                         {
                             foreach (var asset in assets.EnumerateArray())

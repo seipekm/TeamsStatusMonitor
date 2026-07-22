@@ -433,8 +433,17 @@ namespace TeamsStatus
                     Log($"Empfangen: {data}");
                     if (data.StartsWith("VERSION:"))
                     {
-                        string version = data.Substring(8);
-                        CurrentFirmwareVersion = version;
+                        string[] parts = data.Split(':');
+                        if (parts.Length >= 3)
+                        {
+                            CurrentFirmwareArchitecture = parts[1]; // RP2040 oder ESP32
+                            CurrentFirmwareVersion = parts[2];
+                        }
+                        else
+                        {
+                            // Fallback fr alte Firmware
+                            CurrentFirmwareVersion = data.Substring(8);
+                        }
                     }
                 }
             }
@@ -442,6 +451,7 @@ namespace TeamsStatus
         }
 
         public string CurrentFirmwareVersion { get; set; } = "Unbekannt";
+        public string CurrentFirmwareArchitecture { get; set; } = "RP2040";
         public bool FirmwareUpdateFailed { get; set; } = false;
 
         /// <summary>
@@ -504,11 +514,12 @@ namespace TeamsStatus
                         if (result == Wpf.Ui.Controls.MessageBoxResult.Primary)
                         {
                             string downloadUrl = "";
+                            string targetAsset = CurrentFirmwareArchitecture == "ESP32" ? "firmware.bin" : "firmware.uf2";
                             if (root.TryGetProperty("assets", out JsonElement assets))
                             {
                                 foreach (var asset in assets.EnumerateArray())
                                 {
-                                    if (asset.GetProperty("name").GetString() == "firmware.uf2")
+                                    if (asset.GetProperty("name").GetString() == targetAsset)
                                     {
                                         downloadUrl = asset.GetProperty("browser_download_url").GetString() ?? "";
                                         break;
@@ -522,7 +533,7 @@ namespace TeamsStatus
                             }
                             else
                             {
-                                await ShowFluentMessageBoxAsync("Fehler", "Die Datei firmware.uf2 wurde im neuesten Release nicht gefunden.");
+                                await ShowFluentMessageBoxAsync("Fehler", $"Die Datei {targetAsset} wurde im neuesten Release nicht gefunden.");
                             }
                         }
                     }
@@ -538,11 +549,12 @@ namespace TeamsStatus
                     if (result == Wpf.Ui.Controls.MessageBoxResult.Primary)
                     {
                         string downloadUrl = "";
+                        string targetAsset = CurrentFirmwareArchitecture == "ESP32" ? "firmware.bin" : "firmware.uf2";
                         if (root.TryGetProperty("assets", out JsonElement assets))
                         {
                             foreach (var asset in assets.EnumerateArray())
                             {
-                                if (asset.GetProperty("name").GetString() == "firmware.uf2")
+                                if (asset.GetProperty("name").GetString() == targetAsset)
                                 {
                                     downloadUrl = asset.GetProperty("browser_download_url").GetString() ?? "";
                                     break;
@@ -556,7 +568,7 @@ namespace TeamsStatus
                         }
                         else
                         {
-                            await ShowFluentMessageBoxAsync("Fehler", "Die Datei firmware.uf2 wurde im neuesten Release nicht gefunden.");
+                            await ShowFluentMessageBoxAsync("Fehler", $"Die Datei {targetAsset} wurde im neuesten Release nicht gefunden.");
                         }
                     }
                 }
@@ -580,7 +592,7 @@ namespace TeamsStatus
                 DisconnectSerial();
                 await Task.Delay(500);
 
-                var fwWindow = new FirmwareUpdateWindow(downloadUrl, port)
+                var fwWindow = new FirmwareUpdateWindow(downloadUrl, port, CurrentFirmwareArchitecture)
                 {
                     Owner = this
                 };

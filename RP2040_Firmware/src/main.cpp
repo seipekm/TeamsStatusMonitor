@@ -137,7 +137,11 @@ void loop() {
                 if (firstComma > 0) setGlobalBrightness(constrain(input.substring(firstComma + 1).toInt(), 0, 255));
             } 
             else if (input.startsWith("VERSION")) {
-                Serial.print("VERSION:");
+#if defined(ARDUINO_ARCH_ESP32)
+                Serial.print("VERSION:ESP32:");
+#else
+                Serial.print("VERSION:RP2040:");
+#endif
                 Serial.println(FIRMWARE_VERSION);
             }
             else if (input.startsWith("UPDATE")) {

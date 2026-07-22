@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.IO.Ports;
 using Wpf.Ui.Controls;
+using System.IO.Compression;
+using System.Diagnostics;
 
 namespace TeamsStatus
 {
@@ -12,13 +14,15 @@ namespace TeamsStatus
     {
         private string _downloadUrl;
         private string _comPort;
+        private string _architecture;
         public bool UpdateFailed { get; private set; } = false;
 
-        public FirmwareUpdateWindow(string downloadUrl, string comPort)
+        public FirmwareUpdateWindow(string downloadUrl, string comPort, string architecture = "RP2040")
         {
             InitializeComponent();
             _downloadUrl = downloadUrl;
             _comPort = comPort;
+            _architecture = architecture;
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -43,9 +47,10 @@ namespace TeamsStatus
         {
             try
             {
-                // 1. Download UF2
+                // 1. Download Firmware
                 TxtStatus.Text = "Lade Firmware herunter...";
-                string tempFile = Path.Combine(Path.GetTempPath(), "firmware.uf2");
+                string fileExt = _architecture == "ESP32" ? "bin" : "uf2";
+                string tempFile = Path.Combine(Path.GetTempPath(), $"firmware.{fileExt}");
                 
                 using (var client = new HttpClient())
                 {
@@ -87,69 +92,17 @@ namespace TeamsStatus
                     } while (isMoreToRead);
                 }
 
-                // 2. Trigger Bootloader (1200 Baud)
-                TxtStatus.Text = "Neustart in den Bootloader...";
-                ProgressDownload.IsIndeterminate = true;
-                TxtDetail.Text = "Bitte warten...";
-                await Task.Delay(500);
-
-                if (!string.IsNullOrEmpty(_comPort))
+                if (_architecture == "ESP32")
                 {
-                    try
-                    {
-                        using (var resetPort = new SerialPort(_comPort, 1200))
-                        {
-                            resetPort.Open();
-                            await Task.Delay(100);
-                            resetPort.Close();
-                        }
-                    }
-                    catch { } // Kann fehlschlagen, wenn das GerÃ¤t sofort verschwindet
+                    await FlashESP32(tempFile);
                 }
-
-                // 3. Warten auf RPI-RP2 Laufwerk
-                TxtStatus.Text = "Suche nach Controller...";
-                TxtDetail.Text = "Warte auf RPI-RP2 Laufwerk...";
-                string targetDrive = "";
-                for (int i = 0; i < 30; i++) // 15 Sekunden warten
+                else
                 {
-                    await Task.Delay(500);
-                    var drives = DriveInfo.GetDrives();
-                    foreach (var d in drives)
-                    {
-                        if (d.IsReady && d.VolumeLabel == "RPI-RP2")
-                        {
-                            targetDrive = d.Name;
-                            break;
-                        }
-                    }
-                    if (!string.IsNullOrEmpty(targetDrive)) break;
+                    await FlashRP2040(tempFile);
                 }
-
-                if (string.IsNullOrEmpty(targetDrive))
-                {
-                    UpdateFailed = true;
-                    var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-                    {
-                        Title = "Fehler",
-                        Content = "RP2040 Bootloader-Laufwerk (RPI-RP2) wurde nicht gefunden. Bitte manuell abstecken und mit gedrÃ¼ckter BOOT-Taste anstecken.",
-                        CloseButtonText = "OK",
-                        ShowTitle = true
-                    };
-                    await uiMessageBox.ShowDialogAsync();
-                    this.Close();
-                    return;
-                }
-
-                // 4. Kopieren
-                TxtStatus.Text = "Kopiere Firmware...";
-                TxtDetail.Text = "Schreibe Daten auf den Controller...";
-                string destFile = Path.Combine(targetDrive, "firmware.uf2");
-                
-                await Task.Run(() => File.Copy(tempFile, destFile, true));
                 
                 TxtStatus.Text = "Erfolgreich abgeschlossen!";
-                TxtDetail.Text = "GerÃ¤t startet neu...";
+                TxtDetail.Text = "Gerät startet neu...";
                 
                 await Task.Delay(1500);
                 this.Close();
@@ -166,6 +119,119 @@ namespace TeamsStatus
                 await uiMessageBox.ShowDialogAsync();
                 this.Close();
             }
+        }
+        
+        private async Task FlashESP32(string tempFile)
+        {
+            TxtStatus.Text = "Bereite Flashen vor...";
+            ProgressDownload.IsIndeterminate = true;
+            
+            // esptool Pfad
+            string localAppData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TeamsStatusMonitor", "esptool");
+            Directory.CreateDirectory(localAppData);
+            string esptoolExe = Path.Combine(localAppData, "esptool-v4.8.1-win64", "esptool.exe");
+            
+            if (!File.Exists(esptoolExe))
+            {
+                TxtDetail.Text = "Lade esptool herunter...";
+                string esptoolUrl = "https://github.com/espressif/esptool/releases/download/v4.8.1/esptool-v4.8.1-win64.zip";
+                string zipPath = Path.Combine(localAppData, "esptool.zip");
+                
+                using (var client = new HttpClient())
+                {
+                    var response = await client.GetByteArrayAsync(esptoolUrl);
+                    await File.WriteAllBytesAsync(zipPath, response);
+                }
+                
+                TxtDetail.Text = "Entpacke esptool...";
+                ZipFile.ExtractToDirectory(zipPath, localAppData, true);
+                File.Delete(zipPath);
+            }
+            
+            TxtStatus.Text = "Flashe ESP32S3...";
+            TxtDetail.Text = "Bitte warten...";
+            
+            // Execute esptool
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = esptoolExe,
+                Arguments = $"--chip esp32s3 --port {_comPort} --baud 460800 write_flash -z 0x10000 \"{tempFile}\"",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            };
+            
+            using (var process = Process.Start(startInfo))
+            {
+                if (process == null) throw new Exception("Konnte esptool.exe nicht starten.");
+                
+                // Wir könnten hier den Output lesen und im UI anzeigen
+                string output = await process.StandardOutput.ReadToEndAsync();
+                string err = await process.StandardError.ReadToEndAsync();
+                
+                await process.WaitForExitAsync();
+                
+                if (process.ExitCode != 0)
+                {
+                    throw new Exception($"esptool Fehler:\n{output}\n{err}");
+                }
+            }
+        }
+
+        private async Task FlashRP2040(string tempFile)
+        {
+            // 2. Trigger Bootloader (1200 Baud)
+            TxtStatus.Text = "Neustart in den Bootloader...";
+            ProgressDownload.IsIndeterminate = true;
+            TxtDetail.Text = "Bitte warten...";
+            await Task.Delay(500);
+
+            if (!string.IsNullOrEmpty(_comPort))
+            {
+                try
+                {
+                    using (var resetPort = new SerialPort(_comPort, 1200))
+                    {
+                        resetPort.Open();
+                        await Task.Delay(100);
+                        resetPort.Close();
+                    }
+                }
+                catch { } // Kann fehlschlagen, wenn das Gerät sofort verschwindet
+            }
+
+            // 3. Warten auf RPI-RP2 Laufwerk
+            TxtStatus.Text = "Suche nach Controller...";
+            TxtDetail.Text = "Warte auf RPI-RP2 Laufwerk...";
+            string targetDrive = "";
+            for (int i = 0; i < 30; i++) // 15 Sekunden warten
+            {
+                await Task.Delay(500);
+                var drives = DriveInfo.GetDrives();
+                foreach (var d in drives)
+                {
+                    if (d.IsReady && d.VolumeLabel == "RPI-RP2")
+                    {
+                        targetDrive = d.Name;
+                        break;
+                    }
+                }
+                if (!string.IsNullOrEmpty(targetDrive)) break;
+            }
+
+            if (string.IsNullOrEmpty(targetDrive))
+            {
+                UpdateFailed = true;
+                throw new Exception("RP2040 Bootloader-Laufwerk (RPI-RP2) wurde nicht gefunden. Bitte manuell abstecken und mit gedrückter BOOT-Taste anstecken.");
+            }
+
+            // 4. Kopieren
+            TxtStatus.Text = "Kopiere Firmware...";
+            TxtDetail.Text = "Schreibe Daten auf den Controller...";
+            string destFile = Path.Combine(targetDrive, "firmware.uf2");
+            
+            await Task.Run(() => File.Copy(tempFile, destFile, true));
         }
     }
 }

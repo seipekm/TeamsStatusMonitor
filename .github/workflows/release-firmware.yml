@@ -40,13 +40,21 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade platformio
 
-    - name: Run PlatformIO Build
-      run: pio run -d RP2040_Firmware
+    - name: Build firmware for RP2040
+      run: pio run -e waveshare_rp2040_zero -d RP2040_Firmware
+
+    - name: Build firmware for ESP32-S3
+      run: pio run -e seeed_xiao_esp32s3 -d RP2040_Firmware
+
+    - name: Build firmware for RP2350
+      run: pio run -e waveshare_rp2350_zero -d RP2040_Firmware
 
     - name: Rename Firmware Binaries
       run: |
         Rename-Item -Path "RP2040_Firmware/.pio/build/waveshare_rp2040_zero/firmware.uf2" -NewName "RP2040_firmware.uf2"
         Rename-Item -Path "RP2040_Firmware/.pio/build/seeed_xiao_esp32s3/firmware.bin" -NewName "ESP32_firmware.bin"
+        Rename-Item -Path "RP2040_Firmware/.pio/build/waveshare_rp2350_zero/firmware.uf2" -NewName "RP2350_firmware.uf2"
+      shell: pwsh
 
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
@@ -55,6 +63,7 @@ jobs:
         path: |
           RP2040_Firmware/.pio/build/waveshare_rp2040_zero/RP2040_firmware.uf2
           RP2040_Firmware/.pio/build/seeed_xiao_esp32s3/ESP32_firmware.bin
+          RP2040_Firmware/.pio/build/waveshare_rp2350_zero/RP2350_firmware.uf2
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
@@ -64,5 +73,6 @@ jobs:
         files: |
           RP2040_Firmware/.pio/build/waveshare_rp2040_zero/RP2040_firmware.uf2
           RP2040_Firmware/.pio/build/seeed_xiao_esp32s3/ESP32_firmware.bin
+          RP2040_Firmware/.pio/build/waveshare_rp2350_zero/RP2350_firmware.uf2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
@@ -520,7 +520,7 @@ namespace TeamsStatus
                         if (result == Wpf.Ui.Controls.MessageBoxResult.Primary)
                         {
                             string downloadUrl = "";
-                        string targetAsset = CurrentFirmwareArchitecture == "ESP32" ? "ESP32_firmware.bin" : "RP2040_firmware.uf2";
+                        string targetAsset = CurrentFirmwareArchitecture == "ESP32" ? "ESP32_firmware.bin" : (CurrentFirmwareArchitecture == "RP2350" ? "RP2350_firmware.uf2" : "RP2040_firmware.uf2");
                             if (root.TryGetProperty("assets", out JsonElement assets))
                             {
                                 foreach (var asset in assets.EnumerateArray())
@@ -555,7 +555,7 @@ namespace TeamsStatus
                     if (result == Wpf.Ui.Controls.MessageBoxResult.Primary)
                     {
                         string downloadUrl = "";
-                        string targetAsset = CurrentFirmwareArchitecture == "ESP32" ? "ESP32_firmware.bin" : "RP2040_firmware.uf2";
+                        string targetAsset = CurrentFirmwareArchitecture == "ESP32" ? "ESP32_firmware.bin" : (CurrentFirmwareArchitecture == "RP2350" ? "RP2350_firmware.uf2" : "RP2040_firmware.uf2");
                         if (root.TryGetProperty("assets", out JsonElement assets))
                         {
                             foreach (var asset in assets.EnumerateArray())

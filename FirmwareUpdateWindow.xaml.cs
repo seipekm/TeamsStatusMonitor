@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -102,7 +102,7 @@ namespace TeamsStatus
                 }
                 
                 TxtStatus.Text = "Erfolgreich abgeschlossen!";
-                TxtDetail.Text = "Gerät startet neu...";
+                TxtDetail.Text = "Gerï¿½t startet neu...";
                 
                 await Task.Delay(1500);
                 this.Close();
@@ -166,7 +166,7 @@ namespace TeamsStatus
             {
                 if (process == null) throw new Exception("Konnte esptool.exe nicht starten.");
                 
-                // Wir könnten hier den Output lesen und im UI anzeigen
+                // Wir kï¿½nnten hier den Output lesen und im UI anzeigen
                 string output = await process.StandardOutput.ReadToEndAsync();
                 string err = await process.StandardError.ReadToEndAsync();
                 
@@ -198,12 +198,12 @@ namespace TeamsStatus
                         resetPort.Close();
                     }
                 }
-                catch { } // Kann fehlschlagen, wenn das Gerät sofort verschwindet
+                catch { } // Kann fehlschlagen, wenn das Gerï¿½t sofort verschwindet
             }
 
             // 3. Warten auf RPI-RP2 Laufwerk
             TxtStatus.Text = "Suche nach Controller...";
-            TxtDetail.Text = "Warte auf RPI-RP2 Laufwerk...";
+            TxtDetail.Text = "Warte auf RPI-RP2 / RP2350 Laufwerk...";
             string targetDrive = "";
             for (int i = 0; i < 30; i++) // 15 Sekunden warten
             {
@@ -211,7 +211,7 @@ namespace TeamsStatus
                 var drives = DriveInfo.GetDrives();
                 foreach (var d in drives)
                 {
-                    if (d.IsReady && d.VolumeLabel == "RPI-RP2")
+                    if (d.IsReady && d.VolumeLabel == "RPI-RP2" || d.VolumeLabel == "RP2350")
                     {
                         targetDrive = d.Name;
                         break;
@@ -223,7 +223,7 @@ namespace TeamsStatus
             if (string.IsNullOrEmpty(targetDrive))
             {
                 UpdateFailed = true;
-                throw new Exception("RP2040 Bootloader-Laufwerk (RPI-RP2) wurde nicht gefunden. Bitte manuell abstecken und mit gedrückter BOOT-Taste anstecken.");
+                throw new Exception("RP2040/RP2350 Bootloader-Laufwerk (RPI-RP2 oder RP2350) wurde nicht gefunden. Bitte manuell abstecken und mit gedrï¿½ckter BOOT-Taste anstecken.");
             }
 
             // 4. Kopieren

@@ -1,14 +1,14 @@
-#include <Arduino.h>
+﻿#include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 #include <EEPROM.h>
 
-#define FIRMWARE_VERSION "1.2.14"
+#define FIRMWARE_VERSION "1.2.15"
 
 // Konfiguration der LED-Matrix
 #if defined(ARDUINO_ARCH_ESP32)
 #define LED_PIN    1   // Data Pin für die WS2812 LEDs am XIAO ESP32S3
 #else
-#define LED_PIN    15   // Data Pin für die WS2812 LEDs am RP2040
+#define LED_PIN    15   // Data Pin für die WS2812 LEDs am RP2040 / RP2350
 #endif
 #define NUM_LEDS   16   // Anzahl der LEDs (16 bit Matrix = 16 LEDs)
 
@@ -138,15 +138,19 @@ void loop() {
             } 
             else if (input.startsWith("VERSION")) {
 #if defined(ARDUINO_ARCH_ESP32)
-                Serial.print("VERSION:ESP32:");
+      Serial.println("VERSION:1.1,ARCH:ESP32");
+#elif defined(ARDUINO_ARCH_RP2350)
+      Serial.println("VERSION:1.1,ARCH:RP2350");
 #else
-                Serial.print("VERSION:RP2040:");
+      Serial.println("VERSION:1.1,ARCH:RP2040");
 #endif
                 Serial.println(FIRMWARE_VERSION);
             }
             else if (input.startsWith("UPDATE")) {
 #if defined(ARDUINO_ARCH_RP2040)
                 rp2040.rebootToBootloader();
+#elif defined(ARDUINO_ARCH_RP2350)
+                rp2040.rebootToBootloader(); // The earlephilhower core uses the same namespace or provides this for compatibility
 #elif defined(ARDUINO_ARCH_ESP32)
                 ESP.restart(); // ESP32 hat keinen direkten uf2-Bootloader per Software, aber restart hilft oft
 #endif

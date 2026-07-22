@@ -68,7 +68,7 @@ namespace TeamsStatus
             {
                 try
                 {
-                    bool isTeamsRunning = Process.GetProcessesByName("ms-teams").Length > 0;
+                    bool isTeamsRunning = Process.GetProcessesByName("ms-teams").Length > 0 || Process.GetProcessesByName("Teams").Length > 0;
                     if (!isTeamsRunning)
                     {
                         if (wasTeamsRunning)

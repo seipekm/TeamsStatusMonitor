@@ -99,6 +99,12 @@ namespace TeamsStatus
                             } catch {}
                         }
                     }
+                    else
+                    {
+                        // Wenn es aufhört zu klingeln, zwingen wir den Log-Scanner dazu,
+                        // den aktuellsten Status aus dem Log neu anzuwenden.
+                        _lastParsedLogStatus = "";
+                    }
                 });
             };
             _webSocketService.Start();

@@ -47,13 +47,17 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ReleaseAssets-Firmware
-        path: RP2040_Firmware/.pio/build/waveshare_rp2040_zero/firmware.uf2
+        path: |
+          RP2040_Firmware/.pio/build/waveshare_rp2040_zero/firmware.uf2
+          RP2040_Firmware/.pio/build/seeed_xiao_esp32s3/firmware.bin
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('fw-v1.0.{0}', github.run_number) }}
         name: Release Firmware ${{ github.ref_type == 'tag' && github.ref_name || format('fw-v1.0.{0}', github.run_number) }}
-        files: RP2040_Firmware/.pio/build/waveshare_rp2040_zero/firmware.uf2
+        files: |
+          RP2040_Firmware/.pio/build/waveshare_rp2040_zero/firmware.uf2
+          RP2040_Firmware/.pio/build/seeed_xiao_esp32s3/firmware.bin
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

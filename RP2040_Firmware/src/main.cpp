@@ -5,7 +5,11 @@
 #define FIRMWARE_VERSION "1.2.14"
 
 // Konfiguration der LED-Matrix
-#define LED_PIN    15   // Data Pin für die WS2812 LEDs
+#if defined(ARDUINO_ARCH_ESP32)
+#define LED_PIN    1   // Data Pin für die WS2812 LEDs am XIAO ESP32S3
+#else
+#define LED_PIN    15   // Data Pin für die WS2812 LEDs am RP2040
+#endif
 #define NUM_LEDS   16   // Anzahl der LEDs (16 bit Matrix = 16 LEDs)
 
 // Initialisierung der Adafruit NeoPixel Bibliothek
@@ -137,7 +141,11 @@ void loop() {
                 Serial.println(FIRMWARE_VERSION);
             }
             else if (input.startsWith("UPDATE")) {
+#if defined(ARDUINO_ARCH_RP2040)
                 rp2040.rebootToBootloader();
+#elif defined(ARDUINO_ARCH_ESP32)
+                ESP.restart(); // ESP32 hat keinen direkten uf2-Bootloader per Software, aber restart hilft oft
+#endif
             }
             else {
                 // 2. Daten im Format "R,G,B,Brightness" auswerten

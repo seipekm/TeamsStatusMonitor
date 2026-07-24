@@ -27,3 +27,6 @@ Der Code (PlatformIO in `RP2040_Firmware`) unterstützt mittlerweile drei Archit
 ## Zukünftige To-Dos / Letzte Änderungen
 - **App-Version:** Zuletzt auf `v1.2.26` angehoben (Fix für das Dropdown-Filtering).
 - **Firmware-Version:** Zuletzt auf `v1.2.18` angehoben (Fix für ESP32 USB Freeze).
+
+## KI / Agenten Regeln
+- Es existiert ein `.agents/AGENTS.md` File, welches festlegt, dass diese `HANDOFF.md` immer automatisch von der KI bei Codeänderungen gepflegt werden muss. Dieses Regel-Verzeichnis liegt in Git und wird vom System automatisch eingelesen.

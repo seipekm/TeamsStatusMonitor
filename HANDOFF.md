@@ -34,7 +34,7 @@ Damit der Kontext nicht verloren geht, hier ein Protokoll der wichtigsten und zu
 6. **Automatisches Handoff & Versionierung**: Implementierung von KI-Regeln in `.agents/AGENTS.md` für automatische Release-Tagging und Projekt-Status-Aktualisierungen.
 
 ## Zukünftige To-Dos / Letzte Änderungen
-- **App-Version:** Zuletzt auf `v1.2.34` angehoben (C# App setzt kein DTR/RTS Flag mehr beim Öffnen des Ports, wodurch verhindert wird, dass der ESP32-S3 beim Trennen in den ROM Bootloader resetet wird).
+- **App-Version:** Zuletzt auf `v1.2.35` angehoben (Info-Fenster aktualisiert nun seine Anzeige der Firmware-Version automatisch, nachdem ein Firmware-Update erfolgreich durchgeführt wurde).
 - **Firmware-Version:** Zuletzt auf `v1.2.21` angehoben (Korrektur der internen Versionsnummer, da in 1.2.20 der String in main.cpp versehentlich nicht aktualisiert wurde).
 
 ## KI / Agenten Regeln

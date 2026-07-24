@@ -28,6 +28,10 @@ namespace TeamsStatus
                 {
                     BtnBootloader.Visibility = Visibility.Visible;
                 }
+                
+                // Kurz warten, damit die serielle Schnittstelle die Versionsantwort verarbeiten konnte
+                await Task.Delay(1000);
+                TxtFirmwareVersion.Text = $"Firmware: {mw.CurrentFirmwareVersion}";
             }
         }
 

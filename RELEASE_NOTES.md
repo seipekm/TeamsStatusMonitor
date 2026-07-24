@@ -1,5 +1,13 @@
 # Release Notes
 
+## Version 1.2.35 (App)
+*Veröffentlicht: 24. Juli 2026*
+
+### Bugfixes 🐛
+* **Info-Fenster UI-Update:** Nach einem erfolgreichen Firmware-Update wurde das Info-Fenster nicht automatisch aktualisiert, sodass dort weiterhin die alte Firmware-Version stand. Die App wartet nun kurz, bis sich das Gerät wieder meldet, und aktualisiert dann live die angezeigte Version.
+
+---
+
 ## Version 1.2.21 (Firmware)
 *Veröffentlicht: 24. Juli 2026*
 

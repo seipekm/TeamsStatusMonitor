@@ -1,7 +1,7 @@
 # Teams Status Monitor - Projektstatus
 
 ## Aktuelle Versionen
-- **Windows App**: v1.2.34
+- **Windows App**: v1.2.35
 - **Firmware**: v1.2.21
 
 ## Status der Applikation

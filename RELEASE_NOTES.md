@@ -1,5 +1,13 @@
 # Release Notes
 
+## Version 1.2.34 (App)
+*Veröffentlicht: 24. Juli 2026*
+
+### Bugfixes 🐛
+* **ESP32-S3 Freeze bei "Trennen":** Das Klick auf "Trennen" in der App führte bei ESP32-S3 Boards (mit nativem USB) dazu, dass sich das Gerät komplett aufgehängt hat. Ursache war, dass die C# App beim Schließen des Ports die DTR/RTS-Signale auf Low gezogen hat. Der ESP32-S3 interpretiert diesen Spannungsabfall hardwareseitig als Reset-Befehl in den ROM-Bootloader. Das DTR/RTS Flag wird nun beim normalen Verbindungsaufbau nicht mehr gesetzt, weswegen es beim Trennen auch keinen Reset mehr auslöst.
+
+---
+
 ## Version 1.2.33 (App)
 *Veröffentlicht: 24. Juli 2026*
 

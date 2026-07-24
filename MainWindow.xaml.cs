@@ -355,8 +355,6 @@ namespace TeamsStatus
             try
             {
                 _serialPort = new SerialPort(port, baudRate);
-                _serialPort.DtrEnable = true;
-                _serialPort.RtsEnable = true;
                 _serialPort.DataReceived += SerialPort_DataReceived;
                 _serialPort.Open();
                 SetConnectionStatus(true);

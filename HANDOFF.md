@@ -34,7 +34,7 @@ Damit der Kontext nicht verloren geht, hier ein Protokoll der wichtigsten und zu
 6. **Automatisches Handoff & Versionierung**: Implementierung von KI-Regeln in `.agents/AGENTS.md` für automatische Release-Tagging und Projekt-Status-Aktualisierungen.
 
 ## Zukünftige To-Dos / Letzte Änderungen
-- **App-Version:** Zuletzt auf `v1.2.32` angehoben (ESP32-S3 Firmware-Update verwendet nun `--after soft_reset`, was ein manuelles Neustarten nach dem Flash unnötig macht).
+- **App-Version:** Zuletzt auf `v1.2.33` angehoben (ESP32-S3 Firmware-Update verwendet wieder den Standard-Hard-Reset, aber die App wartet nun lange genug (4 Sek), bis Windows den Native-USB COM-Port nach dem Reboot wieder einhängt).
 - **Firmware-Version:** Zuletzt auf `v1.2.20` angehoben (Neues Ausgabe-Format der Firmware-Version um Timing-Fehler zu vermeiden).
 
 ## KI / Agenten Regeln

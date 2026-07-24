@@ -1,5 +1,14 @@
 # Release Notes
 
+## Version 1.2.33 (App)
+*Veröffentlicht: 24. Juli 2026*
+
+### Bugfixes 🐛
+* **ESP32-S3 esptool Fatal Error:** Ein Versuch, den ESP32-S3 über das `--after soft_reset` Argument nach dem Flashen per Software neu zu starten, führte in Version 1.2.32 zu einem Fatal Error (da der ESP32-S3 Stub diese Methode nicht unterstützt). Dies wurde rückgängig gemacht.
+Stattdessen verwendet `esptool` wieder den Standard-Neustart, welcher intern den Chip zurücksetzt. Das Problem der Verbindungsabbrüche wurde behoben, indem die App nun **4 Sekunden** wartet, bevor sie versucht sich neu zu verbinden. Dadurch hat Windows genug Zeit, den Native-USB COM-Port nach dem ESP-Reboot neu zu enumerieren. Das Flashen läuft nun fehlerfrei und ohne "Strom-Ziehen" ab!
+
+---
+
 ## Version 1.2.32 (App)
 *Veröffentlicht: 24. Juli 2026*
 

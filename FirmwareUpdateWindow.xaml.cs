@@ -104,8 +104,8 @@ namespace TeamsStatus
                 TxtStatus.Text = "Erfolgreich abgeschlossen!";
                 TxtDetail.Text = "Gerät startet neu...";
                 
-                // Wir warten 3 Sekunden, damit Windows genug Zeit hat, den USB Port nach dem Reboot (soft_reset) neu zu mounten
-                await Task.Delay(3000);
+                // Wir warten 4 Sekunden, damit Windows genug Zeit hat, den USB Port nach dem Reboot neu zu mounten
+                await Task.Delay(4000);
                 this.Close();
             }
             catch (Exception ex)
@@ -156,7 +156,7 @@ namespace TeamsStatus
             var startInfo = new ProcessStartInfo
             {
                 FileName = esptoolExe,
-                Arguments = $"--chip esp32s3 --port {_comPort} --baud 460800 --after soft_reset write_flash -z 0x10000 \"{tempFile}\"",
+                Arguments = $"--chip esp32s3 --port {_comPort} --baud 460800 write_flash -z 0x10000 \"{tempFile}\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

@@ -34,7 +34,7 @@ Damit der Kontext nicht verloren geht, hier ein Protokoll der wichtigsten und zu
 6. **Automatisches Handoff & Versionierung**: Implementierung von KI-Regeln in `.agents/AGENTS.md` für automatische Release-Tagging und Projekt-Status-Aktualisierungen.
 
 ## Zukünftige To-Dos / Letzte Änderungen
-- **App-Version:** Zuletzt auf `v1.2.36` angehoben (App fragt beim Verbinden nun die gespeicherte Helligkeit ab und aktualisiert den Slider).
+- **App-Version:** Zuletzt auf `v1.2.37` angehoben (Der Text neben dem Helligkeits-Slider wird nun ebenfalls korrekt aktualisiert, wenn die Helligkeit beim Verbinden vom ESP32 gelesen wird).
 - **Firmware-Version:** Zuletzt auf `v1.2.22` angehoben (Firmware sendet bei Versions-Anfrage nun auch die Helligkeit mit und verarbeitet direkte BRIGHTNESS: Befehle, um Helligkeit in Echtzeit anzupassen).
 
 ## KI / Agenten Regeln

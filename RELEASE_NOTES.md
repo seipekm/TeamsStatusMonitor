@@ -1,5 +1,13 @@
 # Release Notes
 
+## Version 1.2.37 (App)
+*Veröffentlicht: 24. Juli 2026*
+
+### Bugfixes 🐛
+* **Helligkeits-Anzeige Fix:** Wenn die gespeicherte Helligkeit beim Verbinden mit dem ESP32 geladen und der Regler (Slider) automatisch verschoben wurde, hat sich die kleine Text-Zahl daneben (z.B. "128") nicht mit aktualisiert. Dies wurde behoben, sodass Slider und Text nun stets synchron sind.
+
+---
+
 ## Version 1.2.36 (App) / 1.2.22 (Firmware)
 *Veröffentlicht: 24. Juli 2026*
 

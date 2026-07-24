@@ -429,6 +429,7 @@ namespace TeamsStatus
                                 // Temporär Event abklemmen um Endlosschleife beim Verbinden zu vermeiden
                                 SldBrightness.ValueChanged -= SldBrightness_ValueChanged;
                                 SldBrightness.Value = brightness;
+                                if (TxtBrightness != null) TxtBrightness.Text = brightness.ToString();
                                 SldBrightness.ValueChanged += SldBrightness_ValueChanged;
                             });
                         }

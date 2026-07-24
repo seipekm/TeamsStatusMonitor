@@ -1,10 +1,17 @@
 # Release Notes
 
+## Version 1.2.32 (App)
+*Veröffentlicht: 24. Juli 2026*
+
+### Features ✨
+* **ESP32-S3 Auto-Reboot Fix:** Das Firmware-Update für ESP32-S3 Boards (wie XIAO ESP32-S3) wurde verbessert. `esptool` verwendet nun den `--after soft_reset` Parameter. Dadurch sendet der ROM-Bootloader nach erfolgreichem Schreiben einen Software-Neustart an den Mikrocontroller. Der nervige manuelle Schritt "USB-Kabel trennen" entfällt dadurch komplett!
+
+---
 ## Version 1.2.31 (App)
 *Veröffentlicht: 24. Juli 2026*
 
 ### Features ✨
-* **ESP32-S3 Firmware Update:** Da ESP32-S3 Boards mit nativ angebundenem USB (wie z.B. der XIAO ESP32-S3) nach dem Firmware-Flash via `esptool` keinen automatischen Hardware-Reset durchführen können (aufgrund fehlender CP210x Logikschaltung), bleibt das Board im ROM-Bootloader hängen. Die App zeigt nun nach erfolgreichem ESP32-Update ein Dialogfenster an, das den Benutzer auffordert, das USB-Kabel kurz zu ziehen und wieder einzustecken (Stromversorgung trennen), bevor sich die App wiederverbindet.
+* **ESP32-S3 Firmware Update:** Da ESP32-S3 Boards mit nativ angebundenem USB (wie z.B. der XIAO ESP32-S3) nach dem Firmware-Flash via `esptool` keinen automatischen Hardware-Reset durchführen können (aufgrund fehlender CP210x Logikschaltung), bleibt das Board im ROM-Bootloader hängen. Die App zeigt nun nach erfolgreichem ESP32-Update ein Dialogfenster an, das den Benutzer auffordert, das USB-Kabel kurz zu ziehen und wieder einzustecken (Stromversorgung trennen), bevor sich die App wiederverbindet. (Dieser Schritt wurde in Version 1.2.32 durch einen `soft_reset` automatisiert!)
 
 ---
 ## Version 1.2.30 (App)

@@ -95,27 +95,17 @@ namespace TeamsStatus
                 if (_architecture == "ESP32")
                 {
                     await FlashESP32(tempFile);
-                    
-                    TxtStatus.Text = "Erfolgreich abgeschlossen!";
-                    TxtDetail.Text = "Bitte USB-Kabel neu einstecken!";
-                    
-                    var uiMessageBox = new Wpf.Ui.Controls.MessageBox
-                    {
-                        Title = "WICHTIG: Neustart erforderlich",
-                        Content = "Da der ESP32 über natives USB verbunden ist, kann er nicht automatisch neu starten.\n\nBitte ziehe nun das USB-Kabel vom Gerät ab und stecke es wieder ein (stromlos machen). Klicke danach auf OK.",
-                        CloseButtonText = "OK",
-                        ShowTitle = true
-                    };
-                    await uiMessageBox.ShowDialogAsync();
                 }
                 else
                 {
                     await FlashRP2040(tempFile);
-                    TxtStatus.Text = "Erfolgreich abgeschlossen!";
-                    TxtDetail.Text = "Gerät startet neu...";
-                    await Task.Delay(1500);
                 }
                 
+                TxtStatus.Text = "Erfolgreich abgeschlossen!";
+                TxtDetail.Text = "Gerät startet neu...";
+                
+                // Wir warten 3 Sekunden, damit Windows genug Zeit hat, den USB Port nach dem Reboot (soft_reset) neu zu mounten
+                await Task.Delay(3000);
                 this.Close();
             }
             catch (Exception ex)
@@ -166,7 +156,7 @@ namespace TeamsStatus
             var startInfo = new ProcessStartInfo
             {
                 FileName = esptoolExe,
-                Arguments = $"--chip esp32s3 --port {_comPort} --baud 460800 write_flash -z 0x10000 \"{tempFile}\"",
+                Arguments = $"--chip esp32s3 --port {_comPort} --baud 460800 --after soft_reset write_flash -z 0x10000 \"{tempFile}\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,

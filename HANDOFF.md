@@ -6,7 +6,7 @@ Diese Datei dient als Gedächtnis und Dokumentation für zukünftige Arbeiten an
 Ein C# / WPF Windows-Tool, das den Microsoft Teams Status über die lokale WebSocket-API ausliest und per USB (Seriell) an einen Mikrocontroller (mit angeschlossenem WS2812 LED-Strip/Matrix) sendet.
 
 ## Unterstützte Hardware (Firmware)
-Der Code (PlatformIO in `RP2040_Firmware`) unterstützt mittlerweile drei Architekturen, die jeweils über GitHub Actions parallel gebaut werden:
+Der Code (PlatformIO in `PlatformIO`) unterstützt mittlerweile drei Architekturen, die jeweils über GitHub Actions parallel gebaut werden:
 1. **RP2040** (Standard Raspberry Pi Pico) - `.uf2`
 2. **RP2350** (Waveshare RP2350-Zero) - `.uf2`
 3. **ESP32** (z.B. Seeed Studio XIAO ESP32S3) - `.bin`

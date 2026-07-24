@@ -41,19 +41,19 @@ jobs:
         pip install --upgrade platformio
 
     - name: Build firmware for RP2040
-      run: pio run -e waveshare_rp2040_zero -d RP2040_Firmware
+      run: pio run -e waveshare_rp2040_zero -d PlatformIO
 
     - name: Build firmware for ESP32-S3
-      run: pio run -e seeed_xiao_esp32s3 -d RP2040_Firmware
+      run: pio run -e seeed_xiao_esp32s3 -d PlatformIO
 
     - name: Build firmware for RP2350
-      run: pio run -e waveshare_rp2350_zero -d RP2040_Firmware
+      run: pio run -e waveshare_rp2350_zero -d PlatformIO
 
     - name: Rename Firmware Binaries
       run: |
-        Rename-Item -Path "RP2040_Firmware/.pio/build/waveshare_rp2040_zero/firmware.uf2" -NewName "RP2040_firmware.uf2"
-        Rename-Item -Path "RP2040_Firmware/.pio/build/seeed_xiao_esp32s3/firmware.bin" -NewName "ESP32_firmware.bin"
-        Rename-Item -Path "RP2040_Firmware/.pio/build/waveshare_rp2350_zero/firmware.uf2" -NewName "RP2350_firmware.uf2"
+        Rename-Item -Path "PlatformIO/.pio/build/waveshare_rp2040_zero/firmware.uf2" -NewName "RP2040_firmware.uf2"
+        Rename-Item -Path "PlatformIO/.pio/build/seeed_xiao_esp32s3/firmware.bin" -NewName "ESP32_firmware.bin"
+        Rename-Item -Path "PlatformIO/.pio/build/waveshare_rp2350_zero/firmware.uf2" -NewName "RP2350_firmware.uf2"
       shell: pwsh
 
     - name: Upload Build Artifacts
@@ -61,9 +61,9 @@ jobs:
       with:
         name: ReleaseAssets-Firmware
         path: |
-          RP2040_Firmware/.pio/build/waveshare_rp2040_zero/RP2040_firmware.uf2
-          RP2040_Firmware/.pio/build/seeed_xiao_esp32s3/ESP32_firmware.bin
-          RP2040_Firmware/.pio/build/waveshare_rp2350_zero/RP2350_firmware.uf2
+          PlatformIO/.pio/build/waveshare_rp2040_zero/RP2040_firmware.uf2
+          PlatformIO/.pio/build/seeed_xiao_esp32s3/ESP32_firmware.bin
+          PlatformIO/.pio/build/waveshare_rp2350_zero/RP2350_firmware.uf2
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
@@ -71,8 +71,8 @@ jobs:
         tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('fw-v1.0.{0}', github.run_number) }}
         name: Release Firmware ${{ github.ref_type == 'tag' && github.ref_name || format('fw-v1.0.{0}', github.run_number) }}
         files: |
-          RP2040_Firmware/.pio/build/waveshare_rp2040_zero/RP2040_firmware.uf2
-          RP2040_Firmware/.pio/build/seeed_xiao_esp32s3/ESP32_firmware.bin
-          RP2040_Firmware/.pio/build/waveshare_rp2350_zero/RP2350_firmware.uf2
+          PlatformIO/.pio/build/waveshare_rp2040_zero/RP2040_firmware.uf2
+          PlatformIO/.pio/build/seeed_xiao_esp32s3/ESP32_firmware.bin
+          PlatformIO/.pio/build/waveshare_rp2350_zero/RP2350_firmware.uf2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

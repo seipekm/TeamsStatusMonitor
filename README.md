@@ -20,7 +20,7 @@ Ein Zwei-Komponenten-Projekt, bestehend aus einer **C# WPF Desktop-App** und ein
 ## Projektstruktur
 
 1. **`./` (Root)** - C# .NET 9 WPF Desktop-Applikation.  
-2. **`RP2040_Firmware/`** - C++ Firmware-Projekt für PlatformIO.
+2. **`PlatformIO/`** - C++ Firmware-Projekt für PlatformIO.
 
 ## Installation & Setup
 
@@ -31,7 +31,7 @@ Ein Zwei-Komponenten-Projekt, bestehend aus einer **C# WPF Desktop-App** und ein
 
 ### 2. Mikrocontroller flashen
 1. Installiere [Visual Studio Code](https://code.visualstudio.com/) und die Erweiterung [PlatformIO](https://platformio.org/).
-2. Öffne den Ordner `RP2040_Firmware` in VS Code.
+2. Öffne den Ordner `PlatformIO` in VS Code.
 3. Schließe deinen RP2040 an und klicke in PlatformIO auf **Upload** (Pfeil nach rechts).
 
 ### 3. Desktop-App starten

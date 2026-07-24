@@ -421,7 +421,6 @@ namespace TeamsStatus
                             }
                         }
                     }
-                    }
                 }
             }
             catch { }
@@ -1454,4 +1453,5 @@ namespace TeamsStatus
         }
     }
 }
+
 

@@ -25,7 +25,7 @@ Der Code (PlatformIO in `RP2040_Firmware`) unterstützt mittlerweile drei Archit
 - `.github/workflows/release-firmware.yml`: Bei Erstellung eines neuen GitHub-Releases (Tags, z.B. `fw-v1.2.18`) wird der PlatformIO Build-Prozess für alle drei Architekturen gestartet, die Binaries (uf2/bin) richtig umbenannt und als Release-Assets angehängt. Die App greift für automatische Updates auf diese Assets zu.
 
 ## Zukünftige To-Dos / Letzte Änderungen
-- **App-Version:** Zuletzt auf `v1.2.26` angehoben (Fix für das Dropdown-Filtering).
+- **App-Version:** Zuletzt auf `v1.2.27` angehoben (Button zum Öffnen der Log-Datei in der Info-Ansicht hinzugefügt).
 - **Firmware-Version:** Zuletzt auf `v1.2.18` angehoben (Fix für ESP32 USB Freeze).
 
 ## KI / Agenten Regeln

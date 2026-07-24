@@ -1,5 +1,28 @@
 # Release Notes
 
+## Version 1.2.29 (App)
+*Veröffentlicht: 24. Juli 2026*
+
+### Bugfixes 🛠️
+* **Auto-Modus Fix:** Es wurde ein Problem behoben, bei dem die App nicht mehr selbstständig den Status aktualisierte, wenn man von einem manuellen Effekt (wie "Rainbow" oder "Blaulicht") zurück in den Auto-Modus gewechselt hat. Der lokale Status-Speicher wird nun korrekt zurückgesetzt.
+
+---
+
+## Version 1.2.28 (App)
+*Veröffentlicht: 24. Juli 2026*
+
+### Änderungen 📝
+* **WebSocket Entfernung:** Die Microsoft Teams WebSocket-Anbindung (`TeamsWebSocketService`) wurde vollständig aus der App entfernt. Die App liest den Teams-Status und eingehende Anrufe nun ressourcenschonend und absturzsicher ausschließlich über den lokalen Teams-Log-Scanner aus. Dies behebt potentielle Probleme mit blockierenden WebSockets (eingefrorener "Grau"-Status im UI).
+
+---
+
+## Version 1.2.27 (App)
+*Veröffentlicht: 24. Juli 2026*
+
+### Features ✨
+* **Debug-Log Button:** Im Info-Fenster wurde ein Button "Log-Datei öffnen (Fehlersuche)" hinzugefügt, um Endanwendern den direkten Zugriff auf die interne Logdatei zu erleichtern, wodurch Fehler im Log-Scanner schneller analysiert werden können.
+
+---
 ## Version 1.2.19 (App) & 1.2.14 (Firmware)
 *Veröffentlicht: 20. Juli 2026*
 

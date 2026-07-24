@@ -24,6 +24,15 @@ Der Code (PlatformIO in `RP2040_Firmware`) unterstützt mittlerweile drei Archit
 ## CI/CD Pipeline
 - `.github/workflows/release-firmware.yml`: Bei Erstellung eines neuen GitHub-Releases (Tags, z.B. `fw-v1.2.18`) wird der PlatformIO Build-Prozess für alle drei Architekturen gestartet, die Binaries (uf2/bin) richtig umbenannt und als Release-Assets angehängt. Die App greift für automatische Updates auf diese Assets zu.
 
+## Historie (Erledigte Arbeiten)
+Damit der Kontext nicht verloren geht, hier ein Protokoll der wichtigsten und zuletzt durchgeführten Implementierungen:
+1. **RP2350 Support**: Vollständige Integration des *Waveshare RP2350-Zero* (Firmware Build Environment, Laufwerk-Erkennung `RP2350` beim Flashen).
+2. **ESP32 Support**: Integration des *Seeed Studio XIAO ESP32S3* inkl. Auto-Update Mechanismus über `.bin` Dateien.
+3. **ESP32 Native USB Fix**: Fehlerbehebung für einfrierende ESP32-Boards bei Verbindungsabbruch durch `Serial.setTxTimeoutMs(0)`.
+4. **Erweiterte COM-Port Erkennung**: Anzeige der tatsächlichen Hardware-Seriennummern im UI-Dropdown anstelle generischer Namen für ESP32 und RP2xxx.
+5. **Debug Log Viewer**: Hinzufügen eines Buttons im Info-Fenster ("Log-Datei öffnen (Fehlersuche)"), um schwer greifbare Teams-WebSocket Fehler (z.B. UI friert auf Grau ein) analysieren zu können.
+6. **Automatisches Handoff & Versionierung**: Implementierung von KI-Regeln in `.agents/AGENTS.md` für automatische Release-Tagging und Projekt-Status-Aktualisierungen.
+
 ## Zukünftige To-Dos / Letzte Änderungen
 - **App-Version:** Zuletzt auf `v1.2.27` angehoben (Button zum Öffnen der Log-Datei in der Info-Ansicht hinzugefügt).
 - **Firmware-Version:** Zuletzt auf `v1.2.18` angehoben (Fix für ESP32 USB Freeze).

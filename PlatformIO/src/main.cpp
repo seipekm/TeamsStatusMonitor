@@ -2,7 +2,7 @@
 #include <Adafruit_NeoPixel.h>
 #include <EEPROM.h>
 
-#define FIRMWARE_VERSION "1.2.21"
+#define FIRMWARE_VERSION "1.2.22"
 
 // Konfiguration der LED-Matrix
 #if defined(ARDUINO_ARCH_ESP32)
@@ -148,6 +148,19 @@ void loop() {
       Serial.print("VERSION:RP2040:");
 #endif
                 Serial.println(FIRMWARE_VERSION);
+                Serial.print("BRIGHTNESS:");
+                Serial.println(globalBrightness);
+            }
+            else if (input.startsWith("BRIGHTNESS:")) {
+                int colonIndex = input.indexOf(':');
+                if (colonIndex > 0) {
+                    setGlobalBrightness(constrain(input.substring(colonIndex + 1).toInt(), 0, 255));
+                    
+                    // Aktualisiere sofort die Helligkeit, wenn eine Farbe gesetzt ist
+                    if (currentMode == MODE_SOLID) {
+                        setAllLeds(solidR, solidG, solidB, globalBrightness);
+                    }
+                }
             }
             else if (input.startsWith("UPDATE")) {
 #if defined(ARDUINO_ARCH_RP2040)

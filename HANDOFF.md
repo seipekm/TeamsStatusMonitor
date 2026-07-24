@@ -34,8 +34,8 @@ Damit der Kontext nicht verloren geht, hier ein Protokoll der wichtigsten und zu
 6. **Automatisches Handoff & Versionierung**: Implementierung von KI-Regeln in `.agents/AGENTS.md` für automatische Release-Tagging und Projekt-Status-Aktualisierungen.
 
 ## Zukünftige To-Dos / Letzte Änderungen
-- **App-Version:** Zuletzt auf `v1.2.35` angehoben (Info-Fenster aktualisiert nun seine Anzeige der Firmware-Version automatisch, nachdem ein Firmware-Update erfolgreich durchgeführt wurde).
-- **Firmware-Version:** Zuletzt auf `v1.2.21` angehoben (Korrektur der internen Versionsnummer, da in 1.2.20 der String in main.cpp versehentlich nicht aktualisiert wurde).
+- **App-Version:** Zuletzt auf `v1.2.36` angehoben (App fragt beim Verbinden nun die gespeicherte Helligkeit ab und aktualisiert den Slider).
+- **Firmware-Version:** Zuletzt auf `v1.2.22` angehoben (Firmware sendet bei Versions-Anfrage nun auch die Helligkeit mit und verarbeitet direkte BRIGHTNESS: Befehle, um Helligkeit in Echtzeit anzupassen).
 
 ## KI / Agenten Regeln
 - Es existiert ein `.agents/AGENTS.md` File, welches festlegt, dass diese `HANDOFF.md` immer automatisch von der KI bei Codeänderungen gepflegt werden muss. Dieses Regel-Verzeichnis liegt in Git und wird vom System automatisch eingelesen.

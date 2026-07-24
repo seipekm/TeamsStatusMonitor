@@ -1,5 +1,14 @@
 # Release Notes
 
+## Version 1.2.36 (App) / 1.2.22 (Firmware)
+*Veröffentlicht: 24. Juli 2026*
+
+### Features ✨
+* **Helligkeits-Synchronisation:** Die App fragt beim Verbinden mit dem ESP32 nun automatisch die zuletzt gespeicherte Helligkeit ab und stellt den Helligkeits-Regler (Slider) passend ein.
+* **Echtzeit-Helligkeit:** Wird der Helligkeits-Regler in der App verschoben, reagiert die Firmware nun sofort darauf und passt die Helligkeit an, ohne dass erst ein neuer Teams-Status gesendet werden muss.
+
+---
+
 ## Version 1.2.35 (App)
 *Veröffentlicht: 24. Juli 2026*
 

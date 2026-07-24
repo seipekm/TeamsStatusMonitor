@@ -419,6 +419,20 @@ namespace TeamsStatus
                             }
                         }
                     }
+                    else if (data.StartsWith("BRIGHTNESS:"))
+                    {
+                        string[] parts = data.Split(':');
+                        if (parts.Length >= 2 && double.TryParse(parts[1].Trim(), out double brightness))
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                // Temporär Event abklemmen um Endlosschleife beim Verbinden zu vermeiden
+                                SldBrightness.ValueChanged -= SldBrightness_ValueChanged;
+                                SldBrightness.Value = brightness;
+                                SldBrightness.ValueChanged += SldBrightness_ValueChanged;
+                            });
+                        }
+                    }
                 }
             }
             catch { }

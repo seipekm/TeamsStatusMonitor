@@ -2,7 +2,7 @@
 
 ## Aktuelle Versionen
 - **Windows App**: v1.2.34
-- **Firmware**: v1.2.20
+- **Firmware**: v1.2.21
 
 ## Status der Applikation
 🟢 **Stabil**

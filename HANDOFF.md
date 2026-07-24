@@ -35,7 +35,7 @@ Damit der Kontext nicht verloren geht, hier ein Protokoll der wichtigsten und zu
 
 ## Zukünftige To-Dos / Letzte Änderungen
 - **App-Version:** Zuletzt auf `v1.2.34` angehoben (C# App setzt kein DTR/RTS Flag mehr beim Öffnen des Ports, wodurch verhindert wird, dass der ESP32-S3 beim Trennen in den ROM Bootloader resetet wird).
-- **Firmware-Version:** Zuletzt auf `v1.2.20` angehoben (Neues Ausgabe-Format der Firmware-Version um Timing-Fehler zu vermeiden).
+- **Firmware-Version:** Zuletzt auf `v1.2.21` angehoben (Korrektur der internen Versionsnummer, da in 1.2.20 der String in main.cpp versehentlich nicht aktualisiert wurde).
 
 ## KI / Agenten Regeln
 - Es existiert ein `.agents/AGENTS.md` File, welches festlegt, dass diese `HANDOFF.md` immer automatisch von der KI bei Codeänderungen gepflegt werden muss. Dieses Regel-Verzeichnis liegt in Git und wird vom System automatisch eingelesen.

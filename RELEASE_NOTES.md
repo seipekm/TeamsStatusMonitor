@@ -1,5 +1,13 @@
 # Release Notes
 
+## Version 1.2.21 (Firmware)
+*Veröffentlicht: 24. Juli 2026*
+
+### Bugfixes 🐛
+* **Version String Fix:** In der Firmware Version 1.2.20 wurde zwar intern am Code gearbeitet, aber die ausgegebene Versionsnummer in `main.cpp` wurde versehentlich nicht auf 1.2.20 hochgezählt, weshalb die App nach dem Update immer noch "19" anzeigte. Dies wurde nun korrigiert (auf 1.2.21).
+
+---
+
 ## Version 1.2.34 (App)
 *Veröffentlicht: 24. Juli 2026*
 

@@ -35,7 +35,7 @@ Damit der Kontext nicht verloren geht, hier ein Protokoll der wichtigsten und zu
 
 ## Zukünftige To-Dos / Letzte Änderungen
 - **App-Version:** Zuletzt auf `v1.2.29` angehoben (Bugfix: Nach manuellem Effekt springt die App nun korrekt in den alten Auto-Status zurück).
-- **Firmware-Version:** Zuletzt auf `v1.2.18` angehoben (Fix für ESP32 USB Freeze).
+- **Firmware-Version:** Zuletzt auf `v1.2.19` angehoben (Unterstützung für benutzerdefinierte USB PID und Produktname beim ESP32-S3).
 
 ## KI / Agenten Regeln
 - Es existiert ein `.agents/AGENTS.md` File, welches festlegt, dass diese `HANDOFF.md` immer automatisch von der KI bei Codeänderungen gepflegt werden muss. Dieses Regel-Verzeichnis liegt in Git und wird vom System automatisch eingelesen.

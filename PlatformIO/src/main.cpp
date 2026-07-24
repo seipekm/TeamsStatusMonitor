@@ -1,8 +1,8 @@
-﻿#include <Arduino.h>
+#include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
 #include <EEPROM.h>
 
-#define FIRMWARE_VERSION "1.2.18"
+#define FIRMWARE_VERSION "1.2.19"
 
 // Konfiguration der LED-Matrix
 #if defined(ARDUINO_ARCH_ESP32)

@@ -1,5 +1,12 @@
 # Release Notes
 
+## Version 1.2.19 (Firmware)
+*Veröffentlicht: 24. Juli 2026*
+
+### Features ✨
+* **ESP32-S3 USB Identifier:** Es wurde die Möglichkeit in der `platformio.ini` hinzugefügt, bei der ESP32-S3 Firmware eigene `USB_PID` und `USB_PRODUCT` Strings für die native USB CDC Verbindung zu definieren, um den Mikrocontroller im Windows Gerätemanager eindeutig als "Teams Status Monitor" (und mit passender PID 0x1234) zu identifizieren.
+
+---
 ## Version 1.2.29 (App)
 *Veröffentlicht: 24. Juli 2026*
 

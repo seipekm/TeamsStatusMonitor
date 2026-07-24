@@ -856,6 +856,7 @@ namespace TeamsStatus
         private void StartMonitoring()
         {
             StopMonitoring();
+            _lastParsedLogStatus = ""; // Reset force refresh
             _cts = new CancellationTokenSource();
             _ = MonitorTeamsLogAsync(_cts.Token);
         }

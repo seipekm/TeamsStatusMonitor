@@ -34,7 +34,7 @@ Damit der Kontext nicht verloren geht, hier ein Protokoll der wichtigsten und zu
 6. **Automatisches Handoff & Versionierung**: Implementierung von KI-Regeln in `.agents/AGENTS.md` für automatische Release-Tagging und Projekt-Status-Aktualisierungen.
 
 ## Zukünftige To-Dos / Letzte Änderungen
-- **App-Version:** Zuletzt auf `v1.2.30` angehoben (Bugfix: Korrekte Verarbeitung alter Firmware-Versionsstrings).
+- **App-Version:** Zuletzt auf `v1.2.31` angehoben (Dialog für manuellen Neustart (Kabel trennen) nach ESP32-S3 Firmware-Update hinzugefügt).
 - **Firmware-Version:** Zuletzt auf `v1.2.20` angehoben (Neues Ausgabe-Format der Firmware-Version um Timing-Fehler zu vermeiden).
 
 ## KI / Agenten Regeln

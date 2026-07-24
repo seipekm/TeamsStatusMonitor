@@ -1,5 +1,12 @@
 # Release Notes
 
+## Version 1.2.31 (App)
+*Veröffentlicht: 24. Juli 2026*
+
+### Features ✨
+* **ESP32-S3 Firmware Update:** Da ESP32-S3 Boards mit nativ angebundenem USB (wie z.B. der XIAO ESP32-S3) nach dem Firmware-Flash via `esptool` keinen automatischen Hardware-Reset durchführen können (aufgrund fehlender CP210x Logikschaltung), bleibt das Board im ROM-Bootloader hängen. Die App zeigt nun nach erfolgreichem ESP32-Update ein Dialogfenster an, das den Benutzer auffordert, das USB-Kabel kurz zu ziehen und wieder einzustecken (Stromversorgung trennen), bevor sich die App wiederverbindet.
+
+---
 ## Version 1.2.30 (App)
 *Veröffentlicht: 24. Juli 2026*
 

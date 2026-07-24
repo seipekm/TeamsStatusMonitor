@@ -30,9 +30,7 @@ namespace TeamsStatus
         private bool _isLoaded = false;
         private bool _isConnected = false;
         private string _currentMode = "Auto";
-        private string _teamsWebSocketToken = "";
-        private TeamsWebSocketService? _webSocketService;
-        private bool _isWebSocketInMeeting = false;
+
         private string _lastParsedLogStatus = "";
 
         /// <summary>
@@ -71,43 +69,6 @@ namespace TeamsStatus
             
             // Load saved settings
             LoadSettings();
-
-            // Setup WebSocket
-            _webSocketService = new TeamsWebSocketService(_teamsWebSocketToken);
-            _webSocketService.OnLog += Log;
-            _webSocketService.OnTokenReceived += (token) => {
-                _teamsWebSocketToken = token;
-                Dispatcher.Invoke(() => SaveSettings());
-            };
-            _webSocketService.OnMeetingStateChanged += (isInMeeting, isMuted) => {
-                _isWebSocketInMeeting = isInMeeting;
-                // WebSocket ändert nicht mehr aktiv das UI/die Farbe!
-                // Wir nutzen _isWebSocketInMeeting nur noch intern im Log-Scanner, um das Ringing nach dem Abheben zu stoppen.
-                // Künftige Erweiterung: Hier könnte später Mute/Cam-Status an den Mikrocontroller gesendet werden.
-            };
-            _webSocketService.OnCallStateChanged += (isRinging) => {
-                Dispatcher.Invoke(() => {
-                    if (_currentMode != "Auto") return;
-                    
-                    if (isRinging)
-                    {
-                        UpdateStatus("Auto: Eingehender Anruf (Klingelt)", 'R'); // 'R' = Ringing mode
-                        if (_isConnected && _serialPort != null)
-                        {
-                            try {
-                                _serialPort.WriteLine($"Ringing,{(int)SldBrightness.Value}");
-                            } catch {}
-                        }
-                    }
-                    else
-                    {
-                        // Wenn es aufhört zu klingeln, zwingen wir den Log-Scanner dazu,
-                        // den aktuellsten Status aus dem Log neu anzuwenden.
-                        _lastParsedLogStatus = "";
-                    }
-                });
-            };
-            _webSocketService.Start();
             
             _isLoaded = true;
             
@@ -282,8 +243,7 @@ namespace TeamsStatus
                     LastStatusText = _lastUiStatusText,
                     AutoConnect = ChkAutoConnect.IsChecked ?? false,
                     StartMinimized = ChkStartMinimized.IsChecked ?? false,
-                    SendFreeOnConnect = ChkSendFree.IsChecked ?? false,
-                    TeamsWebSocketToken = _teamsWebSocketToken
+                    SendFreeOnConnect = ChkSendFree.IsChecked ?? false
                 };
                 string json = JsonSerializer.Serialize(settings);
                 System.IO.File.WriteAllText(GetSettingsFilePath(), json);
@@ -347,10 +307,6 @@ namespace TeamsStatus
                         ChkSendFree.IsChecked = sendFree.GetBoolean();
                     }
                     
-                    if (root.TryGetProperty("TeamsWebSocketToken", out var tokenProp))
-                    {
-                        _teamsWebSocketToken = tokenProp.GetString() ?? "";
-                    }
                 }
                 
                 ChkStartWindows.IsChecked = System.IO.File.Exists(GetShortcutPath());
@@ -1022,7 +978,7 @@ namespace TeamsStatus
                                 var endedMatches = System.Text.RegularExpressions.Regex.Matches(content, @"reportCall(Ended|Answered|Accepted|Connected)");
                                 foreach (System.Text.RegularExpressions.Match m in endedMatches) if (m.Index > lastCallEndedIdx) lastCallEndedIdx = m.Index;
 
-                                if (lastIncomingCallIdx > lastCallEndedIdx && lastIncomingCallIdx > maxIndex && !_isWebSocketInMeeting)
+                                if (lastIncomingCallIdx > lastCallEndedIdx && lastIncomingCallIdx > maxIndex)
                                 {
                                     parsedStatus = "Ringing";
                                     maxIndex = lastIncomingCallIdx;
@@ -1224,10 +1180,7 @@ namespace TeamsStatus
             {
                 MyNotifyIcon.Dispose();
             }
-            if (_webSocketService != null)
-            {
-                _webSocketService.Stop();
-            }
+
             Application.Current.Shutdown();
         }
 

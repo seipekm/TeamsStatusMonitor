@@ -34,7 +34,7 @@ Damit der Kontext nicht verloren geht, hier ein Protokoll der wichtigsten und zu
 6. **Automatisches Handoff & Versionierung**: Implementierung von KI-Regeln in `.agents/AGENTS.md` für automatische Release-Tagging und Projekt-Status-Aktualisierungen.
 
 ## Zukünftige To-Dos / Letzte Änderungen
-- **App-Version:** Zuletzt auf `v1.2.27` angehoben (Button zum Öffnen der Log-Datei in der Info-Ansicht hinzugefügt).
+- **App-Version:** Zuletzt auf `v1.2.28` angehoben (TeamsWebSocketService vollständig entfernt, da reiner Log-Scanner zuverlässiger und ressourcenschonender ist).
 - **Firmware-Version:** Zuletzt auf `v1.2.18` angehoben (Fix für ESP32 USB Freeze).
 
 ## KI / Agenten Regeln

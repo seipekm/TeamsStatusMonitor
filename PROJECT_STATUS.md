@@ -1,7 +1,7 @@
 # Teams Status Monitor - Projektstatus
 
 ## Aktuelle Versionen
-- **Windows App**: v1.2.27
+- **Windows App**: v1.2.28
 - **Firmware**: v1.2.18
 
 ## Status der Applikation
@@ -20,7 +20,7 @@
 ## Bekannte Probleme / Beobachtungen (Backlog)
 - **Status Freeze nach langen Calls:** Es wurde beobachtet, dass die App nach längeren Calls manchmal fälschlicherweise auf "Grün" (Verfügbar) springt, während der Teams-Status in der App grau bleibt und sich nicht mehr aktualisiert. 
   - *Vermutung:* Microsoft Teams beendet intern temporär die lokale WebSocket-API (evtl. aus Performance-Gründen), oder die Netzwerkverbindung reißt ab.
-  - *Nächster Schritt:* Das in v1.2.27 integrierte Logfile muss beim nächsten Auftreten geprüft werden, um den exakten Fehlertext für das Debugging zu haben.
+  - *Nächster Schritt:* Das in v1.2.27 eingeführte Logfile muss beim nächsten Auftreten geprüft werden, um den exakten Fehlertext für das Debugging zu haben. Da der WebSocket nun in v1.2.28 komplett entfernt wurde, könnte sich das Problem möglicherweise bereits erledigt haben.
 
 ## Nächste geplante Schritte
 1. Auswertung der Log-Dateien zur Lösung des Verbindungsabbruchs bei langen Teams-Calls.

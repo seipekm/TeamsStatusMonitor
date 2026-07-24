@@ -400,19 +400,27 @@ namespace TeamsStatus
                 {
                     string data = _serialPort.ReadLine().Trim();
                     Log($"Empfangen: {data}");
-                    if (data.StartsWith("VERSION:"))
+                                        if (data.StartsWith("VERSION:"))
                     {
-                        string[] parts = data.Split(':');
-                        if (parts.Length >= 3)
+                        if (data.Contains("ARCH:"))
                         {
-                            CurrentFirmwareArchitecture = parts[1]; // RP2040 oder ESP32
-                            CurrentFirmwareVersion = parts[2];
+                            string[] archParts = data.Split(new string[] { "ARCH:" }, StringSplitOptions.None);
+                            if (archParts.Length > 1)
+                            {
+                                CurrentFirmwareArchitecture = archParts[1].Trim();
+                            }
+                            CurrentFirmwareVersion = "Unbekannt";
                         }
                         else
                         {
-                            // Fallback fr alte Firmware
-                            CurrentFirmwareVersion = data.Substring(8);
+                            string[] parts = data.Split(':');
+                            if (parts.Length >= 3)
+                            {
+                                CurrentFirmwareArchitecture = parts[1].Trim();
+                                CurrentFirmwareVersion = parts[2].Trim();
+                            }
                         }
+                    }
                     }
                 }
             }
@@ -1446,3 +1454,4 @@ namespace TeamsStatus
         }
     }
 }
+

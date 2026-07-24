@@ -1,5 +1,19 @@
 # Release Notes
 
+## Version 1.2.30 (App)
+*Veröffentlicht: 24. Juli 2026*
+
+### Bugfixes 🐛
+* **Firmware Update Erkennung:** Es wurde ein Fehler behoben, bei dem die App die Firmware-Version alter Versionen (`< 1.2.20`) falsch einlas und dadurch bei jedem Start fälschlicherweise vorschlug, ein Firmware-Update durchzuführen.
+
+---
+## Version 1.2.20 (Firmware)
+*Veröffentlicht: 24. Juli 2026*
+
+### Bugfixes 🐛
+* **Versions-Ausgabe (Format):** Die Ausgabe der Firmware-Version über die serielle Schnittstelle wurde überarbeitet (`VERSION:<ARCH>:<VERSION>`), damit die Windows-App die Informationen in einer einzigen Textzeile robuster einlesen kann.
+
+---
 ## Version 1.2.19 (Firmware)
 *Veröffentlicht: 24. Juli 2026*
 

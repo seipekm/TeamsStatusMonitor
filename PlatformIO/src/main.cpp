@@ -141,11 +141,11 @@ void loop() {
             } 
             else if (input.startsWith("VERSION")) {
 #if defined(ARDUINO_ARCH_ESP32)
-      Serial.println("VERSION:1.1,ARCH:ESP32");
+      Serial.print("VERSION:ESP32:");
 #elif defined(ARDUINO_ARCH_RP2350)
-      Serial.println("VERSION:1.1,ARCH:RP2350");
+      Serial.print("VERSION:RP2350:");
 #else
-      Serial.println("VERSION:1.1,ARCH:RP2040");
+      Serial.print("VERSION:RP2040:");
 #endif
                 Serial.println(FIRMWARE_VERSION);
             }

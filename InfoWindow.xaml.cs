@@ -50,6 +50,26 @@ namespace TeamsStatus
             }
         }
 
+        private void BtnOpenLog_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string logPath = MainWindow.GetLogFilePath();
+                if (System.IO.File.Exists(logPath))
+                {
+                    Process.Start(new ProcessStartInfo(logPath) { UseShellExecute = true });
+                }
+                else
+                {
+                    MessageBox.Show("Die Log-Datei existiert noch nicht.", "Hinweis", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fehler beim Öffnen der Log-Datei: {ex.Message}", "Fehler", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
             try

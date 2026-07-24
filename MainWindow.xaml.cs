@@ -230,7 +230,7 @@ namespace TeamsStatus
             CmbPorts.ItemsSource = ports;
         }
 
-        private string GetLogFilePath()
+        public static string GetLogFilePath()
         {
             string dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TeamsStatusMonitor");
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
